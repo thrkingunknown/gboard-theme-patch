@@ -2,11 +2,6 @@ name: Build Morphe Patch
 
 on:
   workflow_dispatch:
-    inputs:
-      release_name:
-        description: "Optional artifact/release label"
-        required: false
-        default: "manual"
 
 permissions:
   contents: read
@@ -39,7 +34,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gradle --version
-          gradle :patches:buildAndroid --no-daemon --stacktrace
+          gradle buildAndroid --no-daemon --stacktrace
 
       - name: Verify generated .mpp
         shell: bash

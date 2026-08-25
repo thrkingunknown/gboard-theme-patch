@@ -1,11 +1,13 @@
 group = "dev.dva11.gboard"
-version = "1.0.0"
 
 patches {
     about {
         name = "Dva.11 Gboard Theme Patches"
-        description = "A minimal, isolated resource patch for the Gboard Midnight Red theme."
+        description = "Midnight Red AMOLED theme patch for Gboard."
+        source = "https://github.com/thrkingunknown/gboard-midnight-red-morphe-patch"
         author = "Dva.11"
+        contact = "na"
+        website = "na"
         license = "GPLv3"
     }
 }
