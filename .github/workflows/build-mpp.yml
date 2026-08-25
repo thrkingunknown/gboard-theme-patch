@@ -1,0 +1,65 @@
+name: Build Morphe Patch
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_name:
+        description: "Optional artifact/release label"
+        required: false
+        default: "manual"
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  build:
+    name: Build .mpp
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: gradle
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.14"
+
+      - name: Build Morphe patch bundle
+        env:
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gradle --version
+          gradle :patches:buildAndroid --no-daemon --stacktrace
+
+      - name: Verify generated .mpp
+        shell: bash
+        run: |
+          shopt -s nullglob
+          files=(patches/build/libs/*.mpp)
+          if [ "${#files[@]}" -ne 1 ]; then
+            echo "Expected exactly one .mpp, found ${#files[@]}"
+            find patches/build/libs -maxdepth 1 -type f -print || true
+            exit 1
+          fi
+          ls -lh "${files[0]}"
+          sha256sum "${files[0]}" > patches/build/libs/SHA256SUMS.txt
+
+      - name: Upload .mpp artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Gboard-Midnight-Red-Morphe-Patch-${{ github.run_number }}
+          path: |
+            patches/build/libs/*.mpp
+            patches/build/libs/SHA256SUMS.txt
+          if-no-files-found: error
+          retention-days: 30
