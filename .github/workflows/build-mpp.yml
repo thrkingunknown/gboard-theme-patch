@@ -24,6 +24,28 @@ jobs:
         with:
           gradle-version: "8.14"
 
+      - name: Static bytecode-source verification
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path("patches/src/main/kotlin/dev/dva11/gboard/MidnightRedThemePatch.kt")
+          s = p.read_text()
+          required = [
+              'new-instance v12, Ljxq;',
+              'invoke-static {p1, v11}, Ljyj;->e(Landroid/content/Context;Lqyk;)Ljyj;',
+              'invoke-direct {v12, v9, v11}, Ljxq;-><init>(Ljava/lang/String;Ljyj;)V',
+              'invoke-interface {v5, v12}, Ljava/util/List;->add(Ljava/lang/Object;)Z',
+              'definingClass = "Ljxu;"',
+              'anchor.index,',
+          ]
+          for item in required:
+              assert item in s, item
+          assert 'new-instance v12, Ljyj;' not in s
+          assert 'anchor.index + 1' not in s
+          print("Static injection verification passed")
+          PY
+
       - name: Build
         env:
           GITHUB_ACTOR: ${{ github.actor }}

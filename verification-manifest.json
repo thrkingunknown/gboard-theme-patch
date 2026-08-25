@@ -3,5 +3,7 @@
   "palette_sha256": "c655225ce8aa342bff08c1f55d67527da827045761054b9acd002ab279e2e62d",
   "metadata_sha256": "a16ae5c0ac44d06b21f4a8220edc12ed8089535924d1c58a3646fd7c82d306b1",
   "border_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-  "theme_label": "Midnight Red"
+  "theme_label": "Midnight Red",
+  "revision": "V4 verifier-fix",
+  "critical_fix": "Ljxq constructor receiver now allocated with new-instance Ljxq"
 }

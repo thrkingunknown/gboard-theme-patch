@@ -1,18 +1,43 @@
 # Gboard Midnight Red
 
-Exact target:
+## Exact target
 
-- com.google.android.inputmethod.latin
-- 18.0.3.954559732
-- full release APKM
+- Package: `com.google.android.inputmethod.latin`
+- Version: `18.0.3.954559732`
+- Input: full release APKM
 
-This version adds a separate Midnight Red theme entry. It does not overwrite the
-built-in Red or Pitch Black theme resources.
+## What the patch does
 
-The full Gboard target uses a different theme-listing implementation from the
-Lite build used by kveld9. This patch uses the exact full-target classes and
-native custom-theme construction path verified in the supplied APKM.
+Adds a separate `Midnight Red` theme package and inserts it into Gboard's theme
+listing. It does not overwrite the built-in Red or Pitch Black themes.
 
-Build with GitHub Actions: Actions -> Build Morphe Patch -> Run workflow.
+## Important V4 fix
 
-Insertion boundary is the final native Ljxu constructor after the custom-theme enumeration loop; the patch is therefore not executed conditionally inside that loop.
+The previous repository contained a Dalvik verifier bug:
+
+```smali
+new-instance v12, Ljyj;
+...
+invoke-direct {v12, v9, v11}, Ljxq;-><init>(Ljava/lang/String;Ljyj;)V
+```
+
+`v12` was allocated as `Ljyj` and then passed as the receiver to the constructor
+of `Ljxq`. Android correctly rejected the method with `VerifyError`.
+
+V4 allocates the correct receiver type:
+
+```smali
+new-instance v12, Ljxq;
+...
+invoke-direct {v12, v9, v11}, Ljxq;-><init>(Ljava/lang/String;Ljyj;)V
+```
+
+The GitHub Actions workflow now contains a static verification step that fails
+before Gradle if this mismatch is present.
+
+## Build
+
+GitHub Actions -> Build Morphe Patch -> Run workflow.
+
+The workflow builds the `.mpp`, validates the archive, and uploads it as an
+artifact.

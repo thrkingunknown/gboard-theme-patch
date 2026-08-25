@@ -84,7 +84,7 @@ val midnightRedTheme = bytecodePatch(
                 invoke-interface {v10}, Lqye;->c()Lrdd;
                 move-result-object v10
                 const-string v9, "Midnight Red"
-                new-instance v12, Ljyj;
+                new-instance v12, Ljxq;
                 invoke-static {p1, v11}, Ljyj;->e(Landroid/content/Context;Lqyk;)Ljyj;
                 move-result-object v11
                 invoke-direct {v12, v9, v11}, Ljxq;-><init>(Ljava/lang/String;Ljyj;)V
