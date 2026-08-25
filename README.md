@@ -1,27 +1,18 @@
-# Gboard Midnight Red Theme Patch
+# Gboard Midnight Red
 
-## Target
-- Package: `com.google.android.inputmethod.latin`
-- Tested version: `18.0.3.954559732`
-- Mutation: `assets/theme/style_sheet_color_red.binarypb`
+Exact target:
 
-This patch replaces the built-in red Colours preset with the Midnight Red AMOLED palette.
+- com.google.android.inputmethod.latin
+- 18.0.3.954559732
+- full release APKM
 
-## Build
-Use **Actions → Build Morphe Patch → Run workflow**.
+This version adds a separate Midnight Red theme entry. It does not overwrite the
+built-in Red or Pitch Black theme resources.
 
-The workflow uses the current Morphe template structure, Gradle version catalog, and
-Morphe patch plugin `1.3.4`, then runs:
+The full Gboard target uses a different theme-listing implementation from the
+Lite build used by kveld9. This patch uses the exact full-target classes and
+native custom-theme construction path verified in the supplied APKM.
 
-```text
-gradle buildAndroid
-```
+Build with GitHub Actions: Actions -> Build Morphe Patch -> Run workflow.
 
-The generated `.mpp` is uploaded as the workflow artifact.
-
-## Authentication
-The workflow uses the repository's `GITHUB_TOKEN` with `packages: read`.
-If GitHub Packages authentication is denied for the Morphe registry, add a repository
-secret containing a PAT with `read:packages` and update the workflow to use that secret.
-
-Do not commit personal tokens.
+Insertion boundary is the final native Ljxu constructor after the custom-theme enumeration loop; the patch is therefore not executed conditionally inside that loop.

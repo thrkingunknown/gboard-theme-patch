@@ -1,4 +1,4 @@
-rootProject.name = "gboard-midnight-red-morphe-patch"
+rootProject.name = "gboard-midnight-red-patches"
 
 pluginManagement {
     repositories {

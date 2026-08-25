@@ -1,9 +1,0 @@
-{
-  "patch_name": "Midnight Red Theme",
-  "package": "com.google.android.inputmethod.latin",
-  "version": "18.0.3.954559732",
-  "target_asset": "assets/theme/style_sheet_color_red.binarypb",
-  "replacement_sha256": "c655225ce8aa342bff08c1f55d67527da827045761054b9acd002ab279e2e62d",
-  "mutation_count": 1,
-  "build_task": ":patches:buildAndroid"
-}
