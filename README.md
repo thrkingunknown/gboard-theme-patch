@@ -1,4 +1,4 @@
-# Dva.11 Gboard Midnight Red
+# Gboard Theme Patch
 
 A standalone Morphe patch that adds one isolated `Midnight Red` theme to full Gboard.
 It does not replace Gboard's built-in themes and uses uniquely named assets to avoid
