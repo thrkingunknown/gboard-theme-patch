@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-09-14T05:24:13",
-  "description": "## [1.1.0](https://github.com/thrkingunknown/gboard-theme-patch/compare/v1.0.1...v1.1.0) (2026-09-14)\n\n### ✨ New Features\n\n* cleanup again ([aaf5e55](https://github.com/thrkingunknown/gboard-theme-patch/commit/aaf5e553bfdcb16c76493e4e0c7e5433d9caf41e))",
-  "download_url": "https://github.com/thrkingunknown/gboard-theme-patch/releases/download/v1.1.0/patches-1.1.0.mpp",
+  "created_at": "2026-09-14T05:57:24",
+  "description": "## [1.2.0](https://github.com/thrkingunknown/gboard-theme-patch/compare/v1.1.0...v1.2.0) (2026-09-14)\n\n### ✨ New Features\n\n* metadata fix ([665efb1](https://github.com/thrkingunknown/gboard-theme-patch/commit/665efb1283f7722e72226d5568f4ea0a88c5295d))",
+  "download_url": "https://github.com/thrkingunknown/gboard-theme-patch/releases/download/v1.2.0/patches-1.2.0.mpp",
   "signature_download_url": "",
-  "version": "1.1.0"
+  "version": "1.2.0"
 }
