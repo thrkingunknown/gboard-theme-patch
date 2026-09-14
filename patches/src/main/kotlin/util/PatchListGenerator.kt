@@ -29,7 +29,7 @@ fun main() {
     // artifact by modification time prevents stale bundles from being picked accidentally.
     val patchFile = patchFiles.maxByOrNull { it.lastModified() }!!
     val loadedPatches = loadPatchesFromJar(setOf(patchFile))
-    val patchClassLoader = URLClassLoader(arrayOf(patchFile.toURI().toURL()), PatchListGeneratorKt::class.java.classLoader)
+    val patchClassLoader = URLClassLoader(arrayOf(patchFile.toURI().toURL()), JsonPatch::class.java.classLoader)
     val manifests = patchClassLoader.getResources("META-INF/MANIFEST.MF")
     while (manifests.hasMoreElements()) {
         Manifest(manifests.nextElement().openStream())
