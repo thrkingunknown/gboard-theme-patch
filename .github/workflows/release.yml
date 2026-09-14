@@ -47,6 +47,8 @@ jobs:
           cache-read-only: false
 
       - name: Ensure Gradle wrapper is present
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           if [ ! -f gradle/wrapper/gradle-wrapper.jar ]; then
             gradle wrapper --gradle-version 9.7.1
