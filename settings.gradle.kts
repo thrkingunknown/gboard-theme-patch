@@ -18,7 +18,13 @@ pluginManagement {
 }
 
 plugins {
-    // 1.3.3 is the current Morphe template's known-good settings-plugin version.
-    // 1.3.4 was failing during plugin application before project evaluation.
-    id("app.morphe.patches") version "1.3.3"
+    // 1.3.2 is a published Morphe settings-plugin version with the required AGP 9.x compatibility.
+    id("app.morphe.patches") version "1.3.2"
+}
+
+settings {
+    extensions {
+        defaultNamespace = "app.morphe.extension"
+        proguardFiles(rootProject.projectDir.resolve("extensions/proguard-rules.pro").toString())
+    }
 }

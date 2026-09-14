@@ -27,7 +27,7 @@ release = Path(".github/workflows/release.yml").read_text()
 releaserc = Path(".releaserc").read_text()
 readme = Path("README.md").read_text()
 
-assert 'id("app.morphe.patches") version "1.3.3"' in settings
+assert 'id("app.morphe.patches") version "1.3.2"' in settings
 assert 'morphe-patcher = "1.13.0"' in catalog
 assert 'morphe-patcher = { module = "app.morphe:morphe-patcher", version.ref = "morphe-patcher" }' in catalog
 assert 'name = "Gboard AMOLED Theme Studio"' in build
