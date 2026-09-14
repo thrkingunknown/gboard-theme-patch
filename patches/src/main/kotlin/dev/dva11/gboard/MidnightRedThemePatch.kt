@@ -72,13 +72,33 @@ private fun parseAdditionalThemes(value: String): List<ThemeSpec> {
     val input = value.trim()
     if (input.isEmpty() || input.equals("(none)", ignoreCase = true)) return emptyList()
 
-    return input.split(";;").mapIndexed { index, entry ->
-        val fields = entry.trim().split('|', limit = 5)
-        require(fields.size == 5) {
-            "Additional theme #${index + 1} must use: Name|Background|Primary|Secondary|Tertiary"
+    return input
+        .split(";;")
+        .mapNotNull { rawEntry ->
+            val entry = rawEntry.trim()
+            if (entry.isEmpty()) return@mapNotNull null
+
+            val fields = entry.split('|')
+            if (fields.size > 5) return@mapNotNull null
+
+            val padded = fields + List(5 - fields.size) { "" }
+            val spec = normalizeSpec(
+                padded[0],
+                padded[1],
+                padded[2],
+                padded[3],
+                padded[4],
+            )
+
+            // Validate the complete palette here so one malformed optional theme
+            // cannot abort the entire Gboard patch at resource-generation time.
+            runCatching {
+                parseColor(spec.background)
+                parseColor(spec.primary)
+                parseColor(spec.secondary)
+                parseColor(spec.tertiary)
+            }.getOrNull()?.let { spec } 
         }
-        normalizeSpec(fields[0], fields[1], fields[2], fields[3], fields[4])
-    }
 }
 
 private fun slugify(name: String, index: Int): String {
@@ -278,11 +298,9 @@ private fun injection(specs: List<ThemeSpec>): String {
     }
 
     return """
-        invoke-virtual {p0}, Landroidx/fragment/app/Fragment;->getContext()Landroid/content/Context;
+        invoke-virtual {p0}, Landroidx/fragment/app/Fragment;->requireContext()Landroid/content/Context;
         move-result-object v9
-        if-eqz v9, :midnight_red_theme_end
         $registrations
-        :midnight_red_theme_end
     """.trimIndent()
 }
 
