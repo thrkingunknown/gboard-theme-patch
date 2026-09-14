@@ -30,14 +30,16 @@ jobs:
         with:
           node-version: 'lts/*'
           cache: 'npm'
+          cache-dependency-path: package-lock.json
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci --prefer-offline --no-audit --fund=false
 
       - name: Setup Gradle for wrapper bootstrap
         uses: gradle/actions/setup-gradle@v6
         with:
           gradle-version: '9.7.1'
+          cache-read-only: false
 
       - name: Ensure Gradle wrapper is present
         env:
@@ -51,6 +53,9 @@ jobs:
           chmod +x gradlew
 
       # The Morphe template uses semantic-release to build and publish the MPP.
+      - name: Verify CI, release, and cache configuration
+        run: python3 .github/scripts/verify_ci_config.py
+
       - name: Release
         uses: cycjimmy/semantic-release-action@v6
         id: release
@@ -69,4 +74,4 @@ jobs:
         if: steps.release.outputs.new_release_published != 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./gradlew :patches:buildAndroid clean --no-daemon
+        run: ./gradlew :patches:buildAndroid clean --no-daemon --build-cache
