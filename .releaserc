@@ -69,8 +69,7 @@
       {
         "assets": [
           {
-            "path": "patches/build/libs/*.mpp",
-            "label": "Morphe patch bundle"
+            "path": "patches/build/libs/patches-!(*sources*|*javadoc*).mpp?(.asc)"
           }
         ],
         "successCommentCondition": false

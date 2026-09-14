@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-09-14T11:30:33",
-  "description": "## [1.0.6](https://github.com/thrkingunknown/gboard-theme-patch/compare/v1.0.5...v1.0.6) (2026-09-14)\n\n### 🐛 Bug Fixes\n\n* crashing fix 1 ([93d8726](https://github.com/thrkingunknown/gboard-theme-patch/commit/93d872635a51f68e4e8593d2ca4237c3cc412f58))\n* minor build fix ([112762b](https://github.com/thrkingunknown/gboard-theme-patch/commit/112762beaae5fc989173452ccfd9533aa7dbee9c))",
-  "download_url": "https://github.com/thrkingunknown/gboard-theme-patch/releases/download/v1.0.6/patches-1.0.6.mpp",
+  "created_at": "2026-09-14T00:00:00",
+  "description": "Gboard AMOLED Theme Studio v1.0.3",
+  "download_url": "https://github.com/thrkingunknown/gboard-theme-patch/releases/download/v1.0.3/patches-1.0.3.mpp",
   "signature_download_url": "",
-  "version": "1.0.6"
+  "version": "1.0.3"
 }

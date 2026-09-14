@@ -5,16 +5,15 @@ s=(ROOT/"patches/src/main/kotlin/dev/dva11/gboard/MidnightRedThemePatch.kt").rea
 assert 'name = "Gboard AMOLED Theme Studio"' in s
 assert 'packageName = PACKAGE_NAME' in s
 assert 'AppTarget(' not in s
-assert 'requireContext()Landroid/content/Context;' in s
+assert 'getMethod(Ljava/lang/String;[Ljava/lang/Class;)Ljava/lang/reflect/Method;' in s
+assert 'Method;->invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;' in s
+assert 'Landroidx/fragment/app/Fragment;->getContext()' not in s
 assert 'new-instance v12, Ljxq;' in s
 assert 'new-instance v12, Ljyj;' not in s
 assert 'definingClass = "Ljxu;"' not in s
 assert 'val endIndex = instructions.lastIndex' in s
-assert ':midnight_red_theme_end' not in s
-assert 'if-eqz v9' not in s
 assert 'split(";;")' in s
-assert 'mapNotNull' in s
-assert 'Malformed optional themes are skipped' not in s
+assert 'Additional theme #' in s
 for x in ['DEFAULT_THEME_NAME','DEFAULT_BACKGROUND','DEFAULT_PRIMARY','DEFAULT_SECONDARY','DEFAULT_TERTIARY']:
     assert f'default = {x}' in s
 assert 'default = "(none)"' in s
