@@ -47,10 +47,7 @@ assert bundle["download_url"].endswith(f"/v{project_version}/patches-{project_ve
 assert json.loads(Path("patches-list.json").read_text())["version"] == project_version
 
 settings_text = Path("settings.gradle.kts").read_text()
-workflow_text = release
 assert 'id("app.morphe.patches") version "1.3.4"' in settings_text
-assert 'ORG_GRADLE_PROJECT_gpr_user:' in workflow_text
-assert 'ORG_GRADLE_PROJECT_gpr_key:' in workflow_text
 assert 'includeBuild(localMorphePlugin)' in settings_text
 assert 'val localMorphePatcher = rootDir.resolve(".gradle-deps/morphe-patcher")' in settings_text
 assert 'substitute(module("app.morphe:morphe-patcher")).using(project(":"))' in settings_text

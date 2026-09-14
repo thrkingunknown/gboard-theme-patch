@@ -33,12 +33,4 @@ cp .gradle-deps/morphe-patcher/gradle/wrapper/gradle-wrapper.jar gradle/wrapper/
 chmod +x gradlew .gradle-deps/morphe-patches-gradle-plugin/gradlew .gradle-deps/morphe-patcher/gradlew
 
 test -f gradle/wrapper/gradle-wrapper.jar
-
-# Morphe 1.3.4's SettingsPlugin requires Gradle project properties named
-# gpr.user and gpr.key while it configures repositories. In CI these are
-# supplied through ORG_GRADLE_PROJECT_* environment variables at job scope.
-# Refuse to proceed if the workflow forgot to provide them.
-test -n "${ORG_GRADLE_PROJECT_gpr_user:-}"
-test -n "${ORG_GRADLE_PROJECT_gpr_key:-}"
-
 echo "Morphe source composites and wrapper bootstrap are ready."

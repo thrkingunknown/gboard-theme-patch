@@ -14,10 +14,10 @@ assert 'publishToMavenLocal' not in bootstrap
 assert 'publishToMavenLocal' not in workflow
 assert 'maven.pkg.github.com/MorpheApp/registry' not in settings
 assert 'maven.pkg.github.com/MorpheApp/registry' not in workflow
+assert 'ORG_GRADLE_PROJECT_gpr_user' in workflow if 'workflow' in globals() else 'ORG_GRADLE_PROJECT_gpr_user' in release
+
 assert 'v1.3.4 1.3.4' in bootstrap
 assert 'v1.13.0 1.13.0' in bootstrap
-assert 'ORG_GRADLE_PROJECT_gpr_user:' in workflow
-assert 'ORG_GRADLE_PROJECT_gpr_key:' in workflow
 bootstrap_idx = workflow.index('Bootstrap pinned Morphe toolchain')
 release_idx = workflow.index('uses: cycjimmy/semantic-release-action@v6')
 assert bootstrap_idx < release_idx

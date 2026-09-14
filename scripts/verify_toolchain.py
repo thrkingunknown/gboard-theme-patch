@@ -15,4 +15,6 @@ assert 'publishToMavenLocal' not in bootstrap
 assert 'publishToMavenLocal' not in workflow
 assert 'maven.pkg.github.com/MorpheApp/registry' not in settings
 assert 'maven.pkg.github.com/MorpheApp/registry' not in workflow
+assert 'ORG_GRADLE_PROJECT_gpr_user' in workflow if 'workflow' in globals() else 'ORG_GRADLE_PROJECT_gpr_user' in release
+
 print("Morphe toolchain alignment verification passed")
