@@ -54,8 +54,32 @@ jobs:
           test -f gradle/wrapper/gradle-wrapper.jar
           chmod +x gradlew
 
+      - name: Bootstrap pinned Morphe build dependencies
+        run: |
+          set -euo pipefail
+          rm -rf .gradle-deps
+          mkdir -p .gradle-deps
+
+          git clone --depth 1 --branch 1.3.4 \
+            https://github.com/MorpheApp/morphe-patches-gradle-plugin.git \
+            .gradle-deps/morphe-patches-gradle-plugin || \
+          git clone --depth 1 --branch v1.3.4 \
+            https://github.com/MorpheApp/morphe-patches-gradle-plugin.git \
+            .gradle-deps/morphe-patches-gradle-plugin
+
+          git clone --depth 1 --branch v1.13.0 \
+            https://github.com/MorpheApp/morphe-patcher.git \
+            .gradle-deps/morphe-patcher || \
+          git clone --depth 1 --branch 1.13.0 \
+            https://github.com/MorpheApp/morphe-patcher.git \
+            .gradle-deps/morphe-patcher
+
+          test -f .gradle-deps/morphe-patches-gradle-plugin/settings.gradle.kts
+          test -f .gradle-deps/morphe-patcher/settings.gradle.kts
+
       - name: Ensure Morphe dev branch exists
         env:
+          GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           if git ls-remote --exit-code --heads origin dev >/dev/null 2>&1; then
@@ -109,5 +133,6 @@ jobs:
       - name: Verify project compiles
         if: steps.release.outputs.new_release_published != 'true'
         env:
+          GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: ./gradlew :patches:buildAndroid clean --no-daemon --build-cache

@@ -6,3 +6,6 @@ node_modules/
 local.properties
 gradle.properties.local
 *.apk
+
+# CI-only pinned Morphe build dependencies
+.gradle-deps/

@@ -47,3 +47,8 @@ assert bundle["download_url"].endswith(
 ), "patches-bundle.json download_url does not match project version"
 assert json.loads(Path("patches-list.json").read_text())["version"] == project_version
 print("CI/release/cache/generator configuration verification passed")
+
+assert "Bootstrap pinned Morphe build dependencies" in Path(".github/workflows/release.yml").read_text()
+assert "MorpheApp/morphe-patches-gradle-plugin.git" in Path(".github/workflows/release.yml").read_text()
+assert "MorpheApp/morphe-patcher.git" in Path(".github/workflows/release.yml").read_text()
+print("Morphe CI dependency bootstrap configuration passed")

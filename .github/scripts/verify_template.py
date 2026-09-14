@@ -28,6 +28,8 @@ releaserc = Path(".releaserc").read_text()
 readme = Path("README.md").read_text()
 
 assert 'id("app.morphe.patches") version "1.3.4"' in settings
+assert 'includeBuild(localMorphePlugin)' in settings
+assert 'includeBuild(localMorphePatcher)' in settings
 assert 'morphe-patcher = "1.13.0"' in catalog
 assert 'morphe-patcher = { module = "app.morphe:morphe-patcher", version.ref = "morphe-patcher" }' in catalog
 assert 'name = "Gboard AMOLED Theme Studio"' in build
