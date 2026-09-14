@@ -25,8 +25,9 @@ checks = [
     ("Ensure Morphe dev branch exists", release),
     ("Verify published Morphe metadata", release),
     ("git push origin HEAD:refs/heads/dev", release),
-    ("Bootstrap pinned Morphe build dependencies into mavenLocal", release),
+    ("Bootstrap pinned Morphe toolchain", release),
     ("publishToMavenLocal", release),
+    ("cp .gradle-deps/morphe-patcher/gradle/wrapper/gradle-wrapper.jar gradle/wrapper/gradle-wrapper.jar", release),
 ]
 for needle, haystack in checks:
     assert needle in haystack, needle
@@ -47,8 +48,13 @@ assert bundle["download_url"].endswith(f"/v{project_version}/patches-{project_ve
 assert json.loads(Path("patches-list.json").read_text())["version"] == project_version
 
 settings_text = Path("settings.gradle.kts").read_text()
-assert 'id("app.morphe.patches") version "1.3.3"' in settings_text
+assert 'id("app.morphe.patches") version "1.3.4"' in settings_text
+assert 'includeBuild(localMorphePlugin)' in settings_text
 assert "mavenLocal()" in settings_text
 assert "maven.pkg.github.com/MorpheApp/registry" not in settings_text
+assert "maven.pkg.github.com/MorpheApp/registry" not in release
+bootstrap = release.index("Bootstrap pinned Morphe toolchain")
+release_action = release.index("uses: cycjimmy/semantic-release-action@v6")
+assert bootstrap < release_action
 print("CI/release/cache/generator configuration passed")
 print("Morphe CI bootstrap configuration passed")

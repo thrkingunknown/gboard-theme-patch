@@ -12,6 +12,7 @@ required = [
     ".releaserc",
     ".github/workflows/release.yml",
     ".github/scripts/generate_patches_readme.py",
+    ".github/scripts/bootstrap_morphe.sh",
     "package.json",
     "README.md",
     "patches-bundle.json",
@@ -27,24 +28,26 @@ release = Path(".github/workflows/release.yml").read_text()
 releaserc = Path(".releaserc").read_text()
 readme = Path("README.md").read_text()
 
-assert 'id("app.morphe.patches") version "1.3.3"' in settings
+assert 'id("app.morphe.patches") version "1.3.4"' in settings
+assert 'val localMorphePlugin = rootDir.resolve(".gradle-deps/morphe-patches-gradle-plugin")' in settings
+assert 'includeBuild(localMorphePlugin)' in settings
 assert "mavenLocal()" in settings
 assert "maven.pkg.github.com/MorpheApp/registry" not in settings
-# Gradle settings plugin resolution must not reference variables declared before pluginManagement.
-assert not settings.startswith('val localMorphePlugin')
-assert 'morphe-patcher = "1.7.0"' in catalog
+assert 'morphe-patcher = "1.13.0"' in catalog
 assert 'morphe-patcher = { module = "app.morphe:morphe-patcher", version.ref = "morphe-patcher" }' in catalog
 assert 'name = "Gboard AMOLED Theme Studio"' in build
 assert 'generatePatchesList' in build
 assert 'cycjimmy/semantic-release-action@v6' in release
 assert 'actions/setup-java@v6.0.0' in release
 assert 'actions/setup-node@v7' in release
-assert 'gradle-version: \'9.7.1\'' in release
-assert 'gradle wrapper --gradle-version 9.7.1' in release
-assert "Bootstrap pinned Morphe build dependencies into mavenLocal" in release
-assert "publishToMavenLocal" in release
-assert "MorpheApp/morphe-patches-gradle-plugin" in release
-assert "MorpheApp/morphe-patcher" in release
+assert "gradle-version: '9.7.1'" in release
+assert 'gradle wrapper --gradle-version 9.7.1' not in release
+assert 'gradle/wrapper/gradle-wrapper.jar gradle/wrapper/gradle-wrapper.jar' in release
+assert 'Bootstrap pinned Morphe toolchain' in release
+assert 'publishToMavenLocal' in release
+assert 'MorpheApp/morphe-patches-gradle-plugin' in release
+assert 'MorpheApp/morphe-patcher' in release
+assert '1.3.4' in release and '1.13.0' in release
 assert 'gradle-semantic-release-plugin' in releaserc
 assert 'patches-bundle.json' in releaserc
 assert 'patches-list.json' in releaserc

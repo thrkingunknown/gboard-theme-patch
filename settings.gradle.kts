@@ -1,16 +1,19 @@
 rootProject.name = "gboard-amoled-themes"
 
 pluginManagement {
+    val localMorphePlugin = rootDir.resolve(".gradle-deps/morphe-patches-gradle-plugin")
+    if (localMorphePlugin.isDirectory) {
+        includeBuild(localMorphePlugin)
+    }
+
     repositories {
         mavenLocal()
         gradlePluginPortal()
         google()
-        // The Morphe plugin is bootstrapped into mavenLocal by CI before any
-        // Gradle invocation, so CI does not depend on authenticated GitHub Packages.
         maven { url = uri("https://jitpack.io") }
     }
 }
 
 plugins {
-    id("app.morphe.patches") version "1.3.3"
+    id("app.morphe.patches") version "1.3.4"
 }

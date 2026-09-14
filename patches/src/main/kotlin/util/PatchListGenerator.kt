@@ -55,7 +55,7 @@ private fun generatePatchList(version: String, patches: Set<Patch<*>>) {
             dependencies = patch.dependencies.map { it.javaClass.simpleName },
             // This project's only patch declares one compatibility with zero explicit targets,
             // so the generated target list is intentionally empty. This keeps the generator
-            // compatible with the Morphe Patcher 1.7.x API used by the official Morphe Patches 1.3.3 toolchain.
+            // compatible with the current Morphe Patcher 1.13.0 API.
             compatiblePackages = patch.compatibility?.map { compat ->
                 JsonCompatibility(
                     packageName = compat.packageName!!,
