@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-09-14T00:00:00",
-  "description": "Gboard AMOLED Theme Studio v1.0.0",
-  "download_url": "https://github.com/thrkingunknown/gboard-theme-patch/releases/download/v1.0.0/patches-1.0.0.mpp",
+  "created_at": "2026-09-14T08:45:14",
+  "description": "## [1.0.3](https://github.com/thrkingunknown/gboard-theme-patch/compare/v1.0.2...v1.0.3) (2026-09-14)\n\n### 🐛 Bug Fixes\n\n* metadata fix again ([dc791fb](https://github.com/thrkingunknown/gboard-theme-patch/commit/dc791fbdbec69c20ec4257551468cdc0f0d13640))",
+  "download_url": "https://github.com/thrkingunknown/gboard-theme-patch/releases/download/v1.0.3/patches-1.0.3.mpp",
   "signature_download_url": "",
-  "version": "1.0.0"
+  "version": "1.0.3"
 }
