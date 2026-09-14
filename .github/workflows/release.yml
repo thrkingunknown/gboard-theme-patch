@@ -13,6 +13,8 @@ jobs:
       id-token: write
       attestations: write
     runs-on: ubuntu-latest
+    # semantic-release is configured for main and dev only.
+    if: github.ref_name == 'main' || github.ref_name == 'dev'
     steps:
       - name: Checkout
         uses: actions/checkout@v7

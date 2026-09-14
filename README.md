@@ -49,4 +49,17 @@ previous build.
 
 ## Version
 
-Project/release version: **1.0.0**.
+Project/release version is managed by semantic-release; the generated release metadata below is authoritative.
+
+
+<!-- PATCHES_START -->
+> **[v1.0.0](https://github.com/thrkingunknown/gboard-theme-patch/releases/tag/v1.0.0)** • `main` • 1 patches total
+<details open>
+<summary>📦 Gboard • 1 patch</summary>
+<br>
+| 💊&nbsp;Patch | 📜&nbsp;Description | ⚙️&nbsp;Options |
+|----------|----------------|-----------|
+| [Gboard AMOLED Theme Studio](#gboard-amoled-theme-studio) | Adds configurable standalone AMOLED Gboard themes. Midnight Red is the default palette; additional themes can be defined in one patch. | • Theme name<br>• Background<br>• Primary / action<br>• Secondary / normal keys<br>• Tertiary / modifier keys<br>• Additional themes |
+</details>
+
+<!-- PATCHES_END -->

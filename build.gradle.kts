@@ -1,1 +1,1 @@
-// Root build configuration for Gboard AMOLED Themes
+// Root build configuration for Gboard AMOLED Theme Studio

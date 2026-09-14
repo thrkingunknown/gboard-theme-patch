@@ -29,6 +29,7 @@ checks = [
 for needle, haystack in checks:
     assert needle in haystack, needle
 assert "npm ci" not in release
+assert "github.ref_name == 'main' || github.ref_name == 'dev'" in release
 assert "actions/cache@" not in release
 assert Path("patches/src/main/kotlin/util/PatchListGenerator.kt").exists()
 for metadata in ("patches-bundle.json", "patches-list.json"):
@@ -36,6 +37,14 @@ for metadata in ("patches-bundle.json", "patches-list.json"):
 json.loads(Path("patches-bundle.json").read_text())
 json.loads(Path("patches-list.json").read_text())
 bundle = json.loads(Path("patches-bundle.json").read_text())
-assert bundle["version"] == "1.0.0"
-assert bundle["download_url"].endswith("/v1.0.0/patches-1.0.0.mpp")
+version_match = __import__("re").search(r"(?m)^version=(.+)$", props)
+assert version_match, "gradle.properties must define version"
+project_version = version_match.group(1).strip()
+assert bundle["version"] == project_version, (
+    f"patches-bundle.json version {bundle['version']} != project version {project_version}"
+)
+assert bundle["download_url"].endswith(
+    f"/v{project_version}/patches-{project_version}.mpp"
+), "patches-bundle.json download_url does not match project version"
+assert json.loads(Path("patches-list.json").read_text())["version"] == project_version
 print("CI/release/cache/generator configuration verification passed")

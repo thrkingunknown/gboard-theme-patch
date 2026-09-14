@@ -30,7 +30,7 @@ readme = Path("README.md").read_text()
 assert 'id("app.morphe.patches") version "1.3.4"' in settings
 assert 'morphe-patcher = "1.13.0"' in catalog
 assert 'morphe-patcher = { module = "app.morphe:morphe-patcher", version.ref = "morphe-patcher" }' in catalog
-assert 'name = "Gboard AMOLED Themes"' in build
+assert 'name = "Gboard AMOLED Theme Studio"' in build
 assert 'generatePatchesList' in build
 assert 'cycjimmy/semantic-release-action@v6' in release
 assert 'actions/setup-java@v6.0.0' in release
