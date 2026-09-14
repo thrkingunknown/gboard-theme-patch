@@ -68,7 +68,7 @@ Project/release version is managed by semantic-release; the generated release me
 
 
 <!-- PATCHES_START -->
-> **[v1.0.0](https://github.com/thrkingunknown/gboard-theme-patch/releases/tag/v1.0.0)** • `main` • 1 patches total
+> **[v1.0.1](https://github.com/thrkingunknown/gboard-theme-patch/releases/tag/v1.0.1)** • `main` • 1 patches total
 <details open>
 <summary>📦 Gboard • 1 patch</summary>
 <br>
