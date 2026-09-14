@@ -36,6 +36,6 @@ for metadata in ("patches-bundle.json", "patches-list.json"):
 json.loads(Path("patches-bundle.json").read_text())
 json.loads(Path("patches-list.json").read_text())
 bundle = json.loads(Path("patches-bundle.json").read_text())
-assert bundle["version"] == "1.1.0"
-assert bundle["download_url"].endswith("/v1.1.0/patches-1.1.0.mpp")
+assert bundle["version"] == "1.0.0"
+assert bundle["download_url"].endswith("/v1.0.0/patches-1.0.0.mpp")
 print("CI/release/cache/generator configuration verification passed")

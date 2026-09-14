@@ -1,10 +1,6 @@
 {
   "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
-<<<<<<< HEAD
   "version": "1.0.0",
-=======
-  "version": "1.2.0",
->>>>>>> dc394c552ca18c33cf0371c343ecc0fbe0e5bfca
   "patches": [
     {
       "name": "Gboard AMOLED Theme Studio",
