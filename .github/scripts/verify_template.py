@@ -29,8 +29,8 @@ releaserc = Path(".releaserc").read_text()
 readme = Path("README.md").read_text()
 
 assert 'id("app.morphe.patches") version "1.3.4"' in settings
-assert 'val localMorphePlugin = rootDir.resolve(".gradle-deps/morphe-patches-gradle-plugin")' in settings
-assert 'includeBuild(localMorphePlugin)' in settings
+assert 'localMorphePlugin' not in settings
+assert 'maven { url = uri(rootDir.resolve(".gradle-deps/maven-repo")) }' in settings
 assert "mavenLocal()" in settings
 assert "maven.pkg.github.com/MorpheApp/registry" not in settings
 assert 'morphe-patcher = "1.13.0"' in catalog

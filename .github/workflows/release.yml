@@ -54,6 +54,9 @@ jobs:
           chmod +x .github/scripts/bootstrap_morphe.sh gradlew
           bash .github/scripts/bootstrap_morphe.sh
 
+      - name: Preflight Gradle configuration
+        run: ./gradlew --no-daemon --stacktrace help
+
       - name: Ensure Morphe dev branch exists
         env:
           GITHUB_ACTOR: ${{ github.actor }}
@@ -112,4 +115,4 @@ jobs:
         env:
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./gradlew :patches:buildAndroid clean --no-daemon --build-cache
+        run: ./gradlew clean :patches:buildAndroid --no-daemon --build-cache

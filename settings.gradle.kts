@@ -1,12 +1,11 @@
 rootProject.name = "gboard-amoled-themes"
 
 pluginManagement {
-    val localMorphePlugin = rootDir.resolve(".gradle-deps/morphe-patches-gradle-plugin")
-    if (localMorphePlugin.isDirectory) {
-        includeBuild(localMorphePlugin)
-    }
-
     repositories {
+        // CI bootstraps the exact Morphe Gradle plugin into this repository before
+        // semantic-release starts. This avoids authenticated GitHub Packages during
+        // plugin resolution while keeping the normal Morphe version unchanged.
+        maven { url = uri(rootDir.resolve(".gradle-deps/maven-repo")) }
         mavenLocal()
         gradlePluginPortal()
         google()
@@ -18,8 +17,8 @@ plugins {
     id("app.morphe.patches") version "1.3.4"
 }
 
-// Use the pinned local Patcher source exactly as the official Morphe template does.
-// This avoids Maven/GPG publication entirely during CI bootstrap.
+// Use the pinned local Patcher source as a composite build exactly as the official
+// Morphe patches template does. This avoids Maven publication and GPG requirements.
 val localMorphePatcher = rootDir.resolve(".gradle-deps/morphe-patcher")
 if (localMorphePatcher.isDirectory) {
     includeBuild(localMorphePatcher) {
