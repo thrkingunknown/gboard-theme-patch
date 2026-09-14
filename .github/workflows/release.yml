@@ -52,6 +52,20 @@ jobs:
           test -f gradle/wrapper/gradle-wrapper.jar
           chmod +x gradlew
 
+      # The Morphe template expects a permanent dev branch for prereleases and
+      # back-merging stable releases. Create it automatically for repositories
+      # that were created without the template's second branch.
+      - name: Ensure Morphe dev branch exists
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if git ls-remote --exit-code --heads origin dev >/dev/null 2>&1; then
+            echo "origin/dev already exists"
+          else
+            echo "origin/dev is missing; creating it from the current commit"
+            git push origin HEAD:refs/heads/dev
+          fi
+
       # The Morphe template uses semantic-release to build and publish the MPP.
       - name: Verify CI, release, and cache configuration
         run: python3 .github/scripts/verify_ci_config.py

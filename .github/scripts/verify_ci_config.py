@@ -21,6 +21,8 @@ checks = [
     ("downloadUrlTemplate", releaserc),
     ("prepareCmd", releaserc),
     ("mainClass.set(\"util.PatchListGeneratorKt\")", Path("patches/build.gradle.kts").read_text()),
+    ("Ensure Morphe dev branch exists", release),
+    ("git push origin HEAD:refs/heads/dev", release),
 ]
 for needle, haystack in checks:
     assert needle in haystack, needle
