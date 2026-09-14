@@ -14,6 +14,8 @@ required = [
     ".github/scripts/generate_patches_readme.py",
     "package.json",
     "README.md",
+    "patches-bundle.json",
+    "patches-list.json",
 ]
 for p in required:
     assert Path(p).exists(), p

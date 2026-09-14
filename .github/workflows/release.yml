@@ -76,6 +76,29 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      # semantic-release creates the release commit and tag, but the historical
+      # repository state can leave the branch ref one commit behind the tag.
+      # Morphe Manager reads metadata from the repository default branch, so
+      # make the release commit reachable from the active release branch.
+      - name: Sync release metadata to release branch
+        if: steps.release.outputs.new_release_published == 'true'
+        env:
+          VERSION: ${{ steps.release.outputs.new_release_version }}
+          BRANCH: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          git fetch --force origin "refs/heads/${BRANCH}:refs/remotes/origin/${BRANCH}" --tags
+          TAG="v${VERSION}"
+          if git merge-base --is-ancestor "origin/${BRANCH}" "${TAG}"; then
+            git push origin "refs/tags/${TAG}:refs/heads/${BRANCH}"
+            echo "${BRANCH} fast-forwarded to ${TAG}; release metadata is now on the branch."
+          elif git merge-base --is-ancestor "${TAG}" "origin/${BRANCH}"; then
+            echo "${BRANCH} already contains ${TAG}; no branch update required."
+          else
+            echo "ERROR: ${BRANCH} and ${TAG} have diverged; refusing a force push."
+            exit 1
+          fi
+
       - name: Attest
         if: steps.release.outputs.new_release_published == 'true'
         uses: actions/attest-build-provenance@v4

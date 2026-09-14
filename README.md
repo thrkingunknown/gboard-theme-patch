@@ -8,8 +8,8 @@ Add the GitHub repository as a Morphe patch source:
 
 https://morphe.software/add-source?github=thrkingunknown/gboard-theme-patch
 
-Morphe Manager consumes the generated release metadata and `.mpp` produced by
-the standard Morphe patch release workflow.
+Morphe Manager consumes `patches-bundle.json` from the repository default branch
+and the `.mpp` published by the standard Morphe patch release workflow.
 
 ## Development
 
@@ -45,11 +45,14 @@ theme definitions.
 ## Release model
 
 This repository intentionally uses the official Morphe template semantic-release
-workflow rather than a custom release builder. Morphe's template automatically
-generates `patches-list.json` and `patches-bundle.json`, publishes the `.mpp`,
-and keeps Morphe Manager's source metadata synchronized.
+workflow rather than a custom release builder. Semantic-release generates
+`patches-list.json` and `patches-bundle.json`, publishes the `.mpp`, and the
+release workflow ensures the release metadata remains reachable from the active
+release branch so Morphe Manager can read it. The root metadata files included
+here are a bootstrap copy of the current `v1.1.0` release and will be replaced
+by semantic-release on the next release.
 
-Do not manually edit generated release files.
+Do not manually edit generated release files during normal development.
 
 ## 🩹 Patches
 
