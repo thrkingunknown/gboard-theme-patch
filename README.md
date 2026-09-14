@@ -54,4 +54,13 @@ Do not manually edit generated release files.
 ## 🩹 Patches
 
 <!-- PATCHES_START -->
+> **[v1.1.0](https://github.com/thrkingunknown/gboard-theme-patch/releases/tag/v1.1.0)** • `main` • 1 patches total
+<details open>
+<summary>📦 Gboard • 1 patch</summary>
+<br>
+| 💊&nbsp;Patch | 📜&nbsp;Description | ⚙️&nbsp;Options |
+|----------|----------------|-----------|
+| [Midnight Red AMOLED Theme](#midnight-red-amoled-theme) | Configurable AMOLED Gboard themes with Midnight Red defaults and optional Material You colors. | • Theme name<br>• Background<br>• Primary / action<br>• Secondary / normal keys<br>• Tertiary / modifier keys<br>• Additional themes |
+</details>
+
 <!-- PATCHES_END -->
