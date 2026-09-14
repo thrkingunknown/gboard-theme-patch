@@ -48,7 +48,16 @@ assert bundle["download_url"].endswith(
 assert json.loads(Path("patches-list.json").read_text())["version"] == project_version
 print("CI/release/cache/generator configuration verification passed")
 
-assert "Bootstrap pinned Morphe build dependencies" in Path(".github/workflows/release.yml").read_text()
-assert "MorpheApp/morphe-patches-gradle-plugin.git" in Path(".github/workflows/release.yml").read_text()
-assert "MorpheApp/morphe-patcher.git" in Path(".github/workflows/release.yml").read_text()
+workflow_text = Path(".github/workflows/release.yml").read_text()
+assert "Bootstrap pinned Morphe build dependencies" in workflow_text
+assert "MorpheApp/morphe-patches-gradle-plugin" in workflow_text
+assert "MorpheApp/morphe-patcher" in workflow_text
+assert "clone_tag()" in workflow_text
+assert "v1.3.3" in workflow_text
+assert "v1.7.0" in workflow_text
+assert "GIT_TERMINAL_PROMPT: '0'" in workflow_text
+settings_text = Path("settings.gradle.kts").read_text()
+assert 'pluginManagement {' in settings_text
+assert 'val localMorphePlugin = file(".gradle-deps/morphe-patches-gradle-plugin")' in settings_text
+assert 'includeBuild(localMorphePlugin)' in settings_text
 print("Morphe CI dependency bootstrap configuration passed")

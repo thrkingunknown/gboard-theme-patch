@@ -27,10 +27,14 @@ release = Path(".github/workflows/release.yml").read_text()
 releaserc = Path(".releaserc").read_text()
 readme = Path("README.md").read_text()
 
-assert 'id("app.morphe.patches") version "1.3.4"' in settings
+assert 'id("app.morphe.patches") version "1.3.3"' in settings
+assert 'val localMorphePlugin = file(".gradle-deps/morphe-patches-gradle-plugin")' in settings
 assert 'includeBuild(localMorphePlugin)' in settings
+assert 'val localMorphePatcher = file(".gradle-deps/morphe-patcher")' in settings
 assert 'includeBuild(localMorphePatcher)' in settings
-assert 'morphe-patcher = "1.13.0"' in catalog
+# Gradle settings plugin resolution must not reference variables declared before pluginManagement.
+assert not settings.startswith('val localMorphePlugin')
+assert 'morphe-patcher = "1.7.0"' in catalog
 assert 'morphe-patcher = { module = "app.morphe:morphe-patcher", version.ref = "morphe-patcher" }' in catalog
 assert 'name = "Gboard AMOLED Theme Studio"' in build
 assert 'generatePatchesList' in build

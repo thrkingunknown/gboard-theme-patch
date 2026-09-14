@@ -6,9 +6,9 @@ build = Path("patches/build.gradle.kts").read_text()
 workflow = Path(".github/workflows/release.yml").read_text()
 generator = Path("patches/src/main/kotlin/util/PatchListGenerator.kt").read_text()
 
-assert 'morphe-patcher = "1.13.0"' in catalog
+assert 'morphe-patcher = "1.7.0"' in catalog
 assert 'morphe-patcher = { module = "app.morphe:morphe-patcher", version.ref = "morphe-patcher" }' in catalog
-assert 'id("app.morphe.patches") version "1.3.4"' in settings
+assert 'id("app.morphe.patches") version "1.3.3"' in settings
 assert 'name = "Gboard AMOLED Theme Studio"' in build
 assert 'contact = "https://github.com/thrkingunknown"' in build
 assert 'mainClass.set("util.PatchListGeneratorKt")' in build

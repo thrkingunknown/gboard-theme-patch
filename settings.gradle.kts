@@ -1,10 +1,10 @@
 rootProject.name = "gboard-amoled-themes"
 
-val localMorphePlugin = file(".gradle-deps/morphe-patches-gradle-plugin")
-
 pluginManagement {
-    // CI bootstraps the exact Morphe Gradle plugin source locally. This avoids
-    // GitHub Packages authentication failures for cross-organization reads.
+    // CI bootstraps the exact Morphe Gradle plugin source locally. Keep the
+    // path declaration inside pluginManagement: settings plugin resolution
+    // happens before ordinary settings-script variables are initialized.
+    val localMorphePlugin = file(".gradle-deps/morphe-patches-gradle-plugin")
     if (localMorphePlugin.isDirectory) {
         includeBuild(localMorphePlugin)
     }
@@ -25,7 +25,7 @@ pluginManagement {
 }
 
 plugins {
-    id("app.morphe.patches") version "1.3.4"
+    id("app.morphe.patches") version "1.3.3"
 }
 
 // Use the exact Patcher source locally in CI as well, avoiding a second
