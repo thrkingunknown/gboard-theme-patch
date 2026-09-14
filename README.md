@@ -47,6 +47,11 @@ The registration obtains a real Android `Context` from the Fragment and construc
 `Ljxq` with an `Ljxq` receiver, addressing the ART verifier failure from the
 previous build.
 
+## CI / GitHub Packages credentials
+
+The Morphe Gradle plugin is published to GitHub Packages and requires authenticated package access.
+For GitHub Actions, configure repository secrets `GPR_USER` and `GPR_KEY`, where `GPR_KEY` is a GitHub PAT with `read:packages`. The workflow falls back to `GITHUB_TOKEN` only when those secrets are absent.
+
 ## Version
 
 Project/release version is managed by semantic-release; the generated release metadata below is authoritative.
