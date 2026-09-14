@@ -18,7 +18,15 @@
           "apkFileType": "APKM",
           "appIconColor": "#4285F4",
           "signatures": null,
-          "targets": []
+          "targets": [
+            {
+              "version": null,
+              "versionCodes": null,
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
         }
       ],
       "options": [
