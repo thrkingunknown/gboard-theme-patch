@@ -14,6 +14,8 @@
     "enabled": true,
     "format": "Name|Background|Primary|Secondary|Tertiary",
     "separator": ";;",
-    "emptyValue": "(none)"
+    "acceptedSeparators": [";;", ";", "\n"],
+    "emptyValue": "(none)",
+    "invalidEntries": "ignored"
   }
 }

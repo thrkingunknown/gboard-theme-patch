@@ -19,14 +19,16 @@ Colours accept `#RRGGBB` or `#AARRGGBB`.
 
 The **Additional themes** option is functional.
 
-Format:
+Preferred format:
 `Name|Background|Primary|Secondary|Tertiary`
 
-Separate multiple themes with `;;`:
+Separate multiple themes with `;;` (new lines and single `;` are also accepted):
 `Ocean|#000000|#00B7FF|#08202A|#123C4A;;Purple|#000000|#B56CFF|#24113A|#40205C`
 
 The default Midnight Red theme is always generated from the five primary options.
-Duplicate names are collapsed case-insensitively. Malformed entries fail explicitly.
+Duplicate names are collapsed case-insensitively. Blank/trailing entries are ignored.
+A name-only or partial entry uses the default palette for omitted colors. Invalid-color
+entries are ignored instead of aborting the entire patch.
 
 ## Compatibility
 
