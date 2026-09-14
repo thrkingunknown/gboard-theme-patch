@@ -4,6 +4,9 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$ROOT_DIR"
 
+# Git preserves this script as data in some checkouts; never depend on the executable bit.
+chmod +x "$ROOT_DIR/.github/scripts/bootstrap_morphe.sh" "$ROOT_DIR/gradlew" 2>/dev/null || true
+
 rm -rf .gradle-deps
 mkdir -p .gradle-deps
 

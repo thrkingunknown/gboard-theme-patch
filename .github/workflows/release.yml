@@ -49,7 +49,10 @@ jobs:
       - name: Bootstrap pinned Morphe toolchain
         env:
           GIT_TERMINAL_PROMPT: '0'
-        run: .github/scripts/bootstrap_morphe.sh
+        run: |
+          set -euo pipefail
+          chmod +x .github/scripts/bootstrap_morphe.sh gradlew
+          bash .github/scripts/bootstrap_morphe.sh
 
       - name: Ensure Morphe dev branch exists
         env:
