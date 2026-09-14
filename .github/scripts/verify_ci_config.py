@@ -11,7 +11,7 @@ json.loads(releaserc)
 checks = [
     ("actions/setup-node@v7", release),
     ("cache: 'npm'", release),
-    ("cache-dependency-path: package.json", release),
+    ("cache-dependency-path: package-lock.json", release),
     ("npm install --no-audit --no-fund", release),
     ("gradle/actions/setup-gradle@v6", release),
     ("cache-read-only: false", release),
@@ -20,9 +20,11 @@ checks = [
     ("gradle-semantic-release-plugin", json.dumps(package_json)),
     ("downloadUrlTemplate", releaserc),
     ("prepareCmd", releaserc),
+    ("mainClass.set(\"util.PatchListGeneratorKt\")", Path("patches/build.gradle.kts").read_text()),
 ]
 for needle, haystack in checks:
     assert needle in haystack, needle
 assert "npm ci" not in release
 assert "actions/cache@" not in release
-print("CI/release/cache configuration verification passed")
+assert Path("patches/src/main/kotlin/util/PatchListGenerator.kt").exists()
+print("CI/release/cache/generator configuration verification passed")
