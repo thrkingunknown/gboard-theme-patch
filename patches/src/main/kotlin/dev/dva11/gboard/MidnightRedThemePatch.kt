@@ -22,9 +22,7 @@ private val compatibility = Compatibility(
 )
 
 private val themeNameOption = stringOption(name = "Theme name")
-private val backgroundOption = stringOption(
-    name = "Background (#RRGGBB/#AARRGGBB or Material You)"
-)
+private val backgroundOption = stringOption(name = "Background (#RRGGBB/#AARRGGBB or Material You)")
 private val primaryOption = stringOption(
     name = "Primary / action (#RRGGBB/#AARRGGBB or Material You)"
 )
@@ -346,21 +344,21 @@ val midnightRedTheme = bytecodePatch(
             tertiary,
             additionalThemes,
         )
-        val patchFingerprint = Fingerprint(
+        val themeListing = Fingerprint(
             definingClass = "Lcom/google/android/apps/inputmethod/libs/theme/listing/ThemeListingFragment;",
             name = "f",
             parameters = listOf("Landroid/os/Bundle;"),
             returnType = "V",
         )
 
-        val instructions = patchFingerprint.method.implementation?.instructions
+        val instructions = themeListing.method.implementation?.instructions
             ?: error("ThemeListingFragment.f(Bundle) has no implementation")
         val endIndex = instructions.lastIndex
         require(endIndex >= 0) { "ThemeListingFragment.f(Bundle) has no instructions" }
 
         // Insert immediately before the method's terminal instruction. This avoids
         // inserting into Gboard's existing theme-enumeration loop.
-        patchFingerprint.method.addInstructions(
+        themeListing.method.addInstructions(
             endIndex,
             injection(specs),
         )

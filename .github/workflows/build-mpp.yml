@@ -102,6 +102,12 @@ jobs:
           print("Static verification passed")
           PY
 
+      - name: Static source verification
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/verify_source.py
+
       - name: Build .mpp
         env:
           GITHUB_ACTOR: ${{ github.actor }}
