@@ -26,9 +26,7 @@ checks = [
     ("Verify published Morphe metadata", release),
     ("git push origin HEAD:refs/heads/dev", release),
     ("Bootstrap pinned Morphe toolchain", release),
-    ("publishToMavenLocal", release),
-    ("--exclude-task signMorphe-patcher-publicationPublication", release),
-    ("cp .gradle-deps/morphe-patcher/gradle/wrapper/gradle-wrapper.jar gradle/wrapper/gradle-wrapper.jar", release),
+    ("Bootstrap pinned Morphe toolchain", release),
 ]
 for needle, haystack in checks:
     assert needle in haystack, needle
@@ -51,10 +49,14 @@ assert json.loads(Path("patches-list.json").read_text())["version"] == project_v
 settings_text = Path("settings.gradle.kts").read_text()
 assert 'id("app.morphe.patches") version "1.3.4"' in settings_text
 assert 'includeBuild(localMorphePlugin)' in settings_text
+assert 'val localMorphePatcher = rootDir.resolve(".gradle-deps/morphe-patcher")' in settings_text
+assert 'substitute(module("app.morphe:morphe-patcher")).using(project(":"))' in settings_text
 assert "mavenLocal()" in settings_text
 assert "maven.pkg.github.com/MorpheApp/registry" not in settings_text
 assert "maven.pkg.github.com/MorpheApp/registry" not in release
-assert "--exclude-task signMorphe-patcher-publicationPublication" in release
+assert "substitute(module(\"app.morphe:morphe-patcher\")).using(project(\":\"))" in settings_text
+assert "publishToMavenLocal" not in release
+assert "publishToMavenLocal" not in Path(".github/scripts/bootstrap_morphe.sh").read_text()
 bootstrap = release.index("Bootstrap pinned Morphe toolchain")
 release_action = release.index("uses: cycjimmy/semantic-release-action@v6")
 assert bootstrap < release_action

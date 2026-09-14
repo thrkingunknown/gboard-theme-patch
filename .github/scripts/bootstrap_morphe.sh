@@ -22,12 +22,12 @@ clone_tag() {
 clone_tag MorpheApp/morphe-patches-gradle-plugin v1.3.4 1.3.4 .gradle-deps/morphe-patches-gradle-plugin
 clone_tag MorpheApp/morphe-patcher v1.13.0 1.13.0 .gradle-deps/morphe-patcher
 
+test -f .gradle-deps/morphe-patches-gradle-plugin/gradlew
 test -f .gradle-deps/morphe-patcher/gradlew
 test -f .gradle-deps/morphe-patcher/gradle/wrapper/gradle-wrapper.jar
-chmod +x .gradle-deps/morphe-patcher/gradlew
-(cd .gradle-deps/morphe-patcher && ./gradlew publishToMavenLocal --no-daemon --stacktrace --exclude-task signMorphe-patcher-publicationPublication)
 
 cp .gradle-deps/morphe-patcher/gradle/wrapper/gradle-wrapper.jar gradle/wrapper/gradle-wrapper.jar
-chmod +x gradlew
+chmod +x gradlew .gradle-deps/morphe-patches-gradle-plugin/gradlew .gradle-deps/morphe-patcher/gradlew
 
-echo "Morphe toolchain bootstrapped successfully."
+test -f gradle/wrapper/gradle-wrapper.jar
+echo "Morphe source composites and wrapper bootstrap are ready."

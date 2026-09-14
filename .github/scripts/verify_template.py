@@ -42,12 +42,13 @@ assert 'actions/setup-java@v6.0.0' in release
 assert 'actions/setup-node@v7' in release
 assert "gradle-version: '9.7.1'" in release
 assert 'gradle wrapper --gradle-version 9.7.1' not in release
-assert 'gradle/wrapper/gradle-wrapper.jar gradle/wrapper/gradle-wrapper.jar' in release
 assert 'Bootstrap pinned Morphe toolchain' in release
-assert 'publishToMavenLocal' in release
-assert 'MorpheApp/morphe-patches-gradle-plugin' in release
-assert 'MorpheApp/morphe-patcher' in release
-assert '1.3.4' in release and '1.13.0' in release
+assert 'publishToMavenLocal' not in release
+assert 'includeBuild(localMorphePatcher)' in settings
+bootstrap = Path('.github/scripts/bootstrap_morphe.sh').read_text()
+assert 'MorpheApp/morphe-patches-gradle-plugin' in bootstrap
+assert 'MorpheApp/morphe-patcher' in bootstrap
+assert '1.3.4' in bootstrap and '1.13.0' in bootstrap
 assert 'gradle-semantic-release-plugin' in releaserc
 assert 'patches-bundle.json' in releaserc
 assert 'patches-list.json' in releaserc

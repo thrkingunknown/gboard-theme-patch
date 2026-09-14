@@ -19,5 +19,8 @@
   "runtimeSafety": {
     "contextLookup": "reflection on ThemeListingFragment.getContext()",
     "avoidsDirectAndroidxFragmentInvoke": true
+  },
+  "checks": {
+    "morpheComposites": "scripts/verify_morphe_composites.py"
   }
 }
