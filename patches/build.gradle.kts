@@ -1,5 +1,5 @@
 group = "dev.thrkingunknown.gboard"
-version = "1.0.4"
+version = providers.gradleProperty("version").get()
 
 patches {
     about {
