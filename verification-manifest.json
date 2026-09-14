@@ -1,23 +1,17 @@
 {
-  "name": "Dva.11 Gboard Midnight Red",
-  "version": "1.0.0",
-  "package": "com.google.android.inputmethod.latin",
-  "supportedVersion": "Any",
-  "theme": "Midnight Red",
+  "project_version": "1.0.0",
+  "patch_name": "Midnight Red AMOLED Theme",
+  "source_name": "Gboard AMOLED Themes",
+  "compatibility": {
+    "package": "com.google.android.inputmethod.latin",
+    "versions": "Any",
+    "tested_against": "18.0.3.954559732"
+  },
   "defaults": {
     "background": "#000000",
     "primary": "#FF0000",
-    "secondary": "#120404",
-    "tertiary": "#2A0A0A"
+    "secondary": "#2A0A0A",
+    "tertiary": "#1F0B0B"
   },
-  "assetFiles": [
-    "assets/theme/theme_package_metadata_midnight_red.binarypb",
-    "assets/theme/style_sheet_color_mrd.binarypb",
-    "assets/theme/style_sheet_color_mrd_border.binarypb"
-  ],
-  "runtimeFixes": [
-    "Use Fragment.getContext() rather than Bundle as Context",
-    "Allocate Ljxq receiver as Ljxq",
-    "Register after the theme-construction loop rather than at Ljxu.<init>"
-  ]
+  "dynamic_metadata_sha256": "a125ef3e5db3a8b36ee9d4558b13aaeb7e028c105bd1cb94e6619ca0f4b139aa"
 }

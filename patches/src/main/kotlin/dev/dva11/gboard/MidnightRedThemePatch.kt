@@ -1,205 +1,368 @@
 package dev.dva11.gboard
 
 import app.morphe.patcher.Fingerprint
-import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
-import app.morphe.patcher.patch.ApkFileType
-import app.morphe.patcher.patch.Compatibility
-import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.patcher.patch.rawResourcePatch
-import app.morphe.patcher.patch.stringOption
-import java.util.Base64
+import app.morphe.patcher.patch.*
+
+import java.util.Locale
 
 private const val PACKAGE_NAME = "com.google.android.inputmethod.latin"
-private const val METADATA_PATH = "assets/theme/theme_package_metadata_midnight_red.binarypb"
-private const val SHEET_PATH = "assets/theme/style_sheet_color_mrd.binarypb"
-private const val BORDER_PATH = "assets/theme/style_sheet_color_mrd_border.binarypb"
-private const val THEME_NAME = "Midnight Red"
+private const val DEFAULT_THEME_NAME = "Midnight Red"
+private const val DEFAULT_BACKGROUND = "#000000"
+private const val DEFAULT_PRIMARY = "#FF0000"
+private const val DEFAULT_SECONDARY = "#2A0A0A"
+private const val DEFAULT_TERTIARY = "#1F0B0B"
+private const val MATERIAL_YOU = "Material You"
 
-/**
- * Deliberately declares no app version targets.  Morphe treats a package-level
- * compatibility declaration without targets as compatible with any version.
- * The bytecode fingerprint below still fails closed when the theme-listing
- * structure is not present, rather than producing a partially patched APK.
- */
 private val compatibility = Compatibility(
     name = "Gboard",
     packageName = PACKAGE_NAME,
     apkFileType = ApkFileType.APKM,
     appIconColor = 0x4285F4,
+    // No targets: Morphe reports this patch as compatible with Any Gboard version.
 )
 
-private val defaultPaletteBytes: ByteArray by lazy {
-    Base64.getDecoder().decode(
-        "EjUKK2RlZmF1bHRfa2V5Ym9hcmRfYmFja2dyb3VuZF9zZWNvbmRhcnlfY29sb3ISBgiKlKj5DxIzCilkZWZhdWx0X2tleWJvYXJkX2JhY2tncm91bmRfcHJpbWFyeV9jb2xvchIGCICAgPgPEi4KJGRlZmF1bHRfZ2VuZXJpY19hY2NlbnRfY29sb3JfcHJlc3NlZBIGCICA2P4PEiYKHGRlZmF1bHRfZ2VuZXJpY19hY2NlbnRfY29sb3ISBgiAgPz/DxIsCiJkZWZhdWx0X2JvcmRlcmVkX2tleV9jb2xvcl9wcmVzc2VkEgYItu3a/Q8SJAoaZGVmYXVsdF9ib3JkZXJlZF9rZXlfY29sb3ISBgiu3Lj5DxIxCidkZWZhdWx0X2JvcmRlcmVkX2tleV9kYXJrX2NvbG9yX3ByZXNzZWQSBgit27b9DxIpCh9kZWZhdWx0X2JvcmRlcmVkX2tleV9kYXJrX2NvbG9yEgYIi5b8+A8SNgosY29sb3JfZ2VuZXJpY19leHRlbnNpb25fYmFja2dyb3VuZF9hY3RpdmF0ZWQSBgiKlKj5DxInCh1jb2xvcl9ib3R0b21faW5kaWNhdG9yX2FjdGl2ZRIGCICA/P8P"
-    )
-}
+private val themeNameOption = stringOption(name = "Theme name")
+private val backgroundOption = stringOption(
+    name = "Background (#RRGGBB/#AARRGGBB or Material You)"
+)
+private val primaryOption = stringOption(
+    name = "Primary / action (#RRGGBB/#AARRGGBB or Material You)"
+)
+private val secondaryOption = stringOption(
+    name = "Secondary / normal keys (#RRGGBB/#AARRGGBB or Material You)"
+)
+private val tertiaryOption = stringOption(
+    name = "Tertiary / modifier keys (#RRGGBB/#AARRGGBB or Material You)"
+)
+private val additionalThemesOption = stringOption(
+    name = "Additional themes: Name|Background|Primary|Secondary|Tertiary (one per line)"
+)
 
-private val metadataBytes: ByteArray by lazy {
-    Base64.getDecoder().decode(
-        "EiFzdHlsZV9zaGVldF9jb2xvcl9jb21tb24uYmluYXJ5cGISJnN0eWxlX3NoZWV0X25vbl9keW5hbWljX2NvbG9yLmJpbmFyeXBiEiZzdHlsZV9zaGVldF9jb2xvcl9sYWJlbF93aGl0ZS5iaW5hcnlwYhIqc3R5bGVfc2hlZXRfY29sb3JfZXhwcmVzc2lvbl9kYXJrLmJpbmFyeXBiEiBzdHlsZV9zaGVldF9jb2xvcl9ydWxlcy5iaW5hcnlwYhIec3R5bGVfc2hlZXRfY29sb3JfbXJkLmJpbmFyeXBiGlIIARInc3R5bGVfc2hlZXRfY29sb3JfcnVsZXNfYm9yZGVyLmJpbmFyeXBiEiVzdHlsZV9zaGVldF9jb2xvcl9tcmRfYm9yZGVyLmJpbmFyeXBi"
-    )
-}
+private data class ThemeSpec(
+    val name: String,
+    val background: String,
+    val primary: String,
+    val secondary: String,
+    val tertiary: String,
+)
 
-private val borderBytes = byteArrayOf()
+private fun normalizeSpec(
+    name: String,
+    background: String,
+    primary: String,
+    secondary: String,
+    tertiary: String,
+): ThemeSpec = ThemeSpec(
+    name = name.trim().ifBlank { DEFAULT_THEME_NAME },
+    background = background.trim().ifBlank { DEFAULT_BACKGROUND },
+    primary = primary.trim().ifBlank { DEFAULT_PRIMARY },
+    secondary = secondary.trim().ifBlank { DEFAULT_SECONDARY },
+    tertiary = tertiary.trim().ifBlank { DEFAULT_TERTIARY },
+)
 
-private fun parseArgb(value: String, optionName: String): Int {
-    val normalized = value.trim().removePrefix("#")
-    require(normalized.matches(Regex("[0-9a-fA-F]{6}|[0-9a-fA-F]{8}"))) {
-        "$optionName must be #RRGGBB or #AARRGGBB"
-    }
-
-    val argb = when (normalized.length) {
-        6 -> "FF$normalized"
-        else -> normalized
-    }.toLong(16)
-
-    return argb.toInt()
-}
-
-/**
- * Rewrites only the colour scalar values in the existing theme-sheet protobuf.
- * Keeping field names and wire structure byte-for-byte stable makes the resource
- * patch independent of generated resource IDs and avoids touching Gboard's
- * existing theme packages.
- */
-private fun paletteBytes(
-    background: Int,
-    primary: Int,
-    secondary: Int,
-    tertiary: Int,
-): ByteArray {
-    val replacements = mapOf(
-        "default_keyboard_background_secondary_color" to background,
-        "default_keyboard_background_primary_color" to background,
-        "default_generic_accent_color_pressed" to primary,
-        "default_generic_accent_color" to primary,
-        "default_bordered_key_color_pressed" to secondary,
-        "default_bordered_key_color" to secondary,
-        "default_bordered_key_dark_color_pressed" to tertiary,
-        "default_bordered_key_dark_color" to tertiary,
-        "color_generic_extension_background_activated" to secondary,
-        "color_bottom_indicator_active" to primary,
-    )
-
-    val out = defaultPaletteBytes.copyOf()
-    var cursor = 0
-    for ((name, color) in replacements) {
-        val needle = name.toByteArray(Charsets.UTF_8)
-        val start = out.indexOfSubsequence(needle, cursor)
-        require(start >= 0) { "Theme colour field missing: $name" }
-        val valueStart = start + needle.size
-        val fieldStart = out.indexOf(0x12.toByte(), valueStart)
-        require(fieldStart >= 0) { "Theme colour value missing: $name" }
-        // The embedded colour message is: 0x12 0x06 0x08 <uint32 varint>.
-        val scalarStart = fieldStart + 3
-        val encoded = encodeVarint(color.toLong() and 0xFFFFFFFFL)
-        require(encoded.size == 5) { "Unexpected colour varint width for $name" }
-        require(out[fieldStart + 1].toInt() == 6) { "Unexpected colour message size for $name" }
-        require(out[scalarStart] == 0x08.toByte()) { "Unexpected colour scalar tag for $name" }
-        System.arraycopy(encoded, 0, out, scalarStart + 1, encoded.size)
-        cursor = scalarStart + 1 + encoded.size
-    }
-    return out
-}
-
-private fun ByteArray.indexOfSubsequence(needle: ByteArray, fromIndex: Int): Int {
-    if (needle.isEmpty()) return fromIndex.coerceAtMost(size)
-    outer@ for (i in fromIndex..size - needle.size) {
-        for (j in needle.indices) {
-            if (this[i + j] != needle[j]) continue@outer
+private fun parseAdditionalThemes(value: String): List<ThemeSpec> =
+    value.lineSequence()
+        .map { it.trim() }
+        .filter { it.isNotEmpty() }
+        .mapNotNull { line ->
+            val fields = line.split('|', limit = 5)
+            if (fields.size != 5) return@mapNotNull null
+            normalizeSpec(fields[0], fields[1], fields[2], fields[3], fields[4])
         }
-        return i
-    }
-    return -1
+        .toList()
+
+private fun slugify(name: String, index: Int): String {
+    val base = name
+        .lowercase(Locale.ROOT)
+        .replace(Regex("[^a-z0-9]+"), "_")
+        .trim('_')
+        .ifBlank { "theme" }
+        .take(24)
+    return "mrd_${base}_${index + 1}"
 }
 
-private fun encodeVarint(value: Long): ByteArray {
+private fun parseColor(spec: String): Int? {
+    val s = spec.trim()
+    if (
+        s.equals(MATERIAL_YOU, ignoreCase = true) ||
+        s.equals("dynamic", ignoreCase = true) ||
+        s.equals("material_you", ignoreCase = true)
+    ) {
+        return null
+    }
+
+    val hex = s.removePrefix("#")
+    require(hex.length == 6 || hex.length == 8) {
+        "Invalid color '$spec'. Use #RRGGBB, #AARRGGBB, or '$MATERIAL_YOU'."
+    }
+    val value = hex.toLongOrNull(16)
+        ?: error("Invalid hexadecimal color '$spec'.")
+    return if (hex.length == 6) {
+        (0xFF000000L or value).toInt()
+    } else {
+        value.toInt()
+    }
+}
+
+private fun blend(color: Int, other: Int, amount: Float): Int {
+    fun c(v: Int, shift: Int) = (v ushr shift) and 0xFF
+    fun mix(a: Int, b: Int): Int =
+        (a + ((b - a) * amount)).toInt().coerceIn(0, 255)
+
+    val r = mix(c(color, 16), c(other, 16))
+    val g = mix(c(color, 8), c(other, 8))
+    val b = mix(c(color, 0), c(other, 0))
+    return (0xFF shl 24) or (r shl 16) or (g shl 8) or b
+}
+
+private fun varint(value: Long): ByteArray {
     var v = value
-    val result = ByteArray(5)
-    for (i in 0 until 5) {
-        if ((v and 0xFFFFFF80L) == 0L) {
-            result[i] = v.toByte()
-            return result.copyOf(i + 1)
-        }
-        result[i] = ((v and 0x7F) or 0x80).toByte()
+    val out = ArrayList<Byte>(5)
+    while (v and -0x80L != 0L) {
+        out += ((v.toInt() and 0x7F) or 0x80).toByte()
         v = v ushr 7
     }
-    error("32-bit colour did not fit in a varint")
+    out += v.toByte()
+    return out.toByteArray()
+}
+
+private fun fieldBytes(field: Int, payload: ByteArray): ByteArray =
+    varint((field shl 3).toLong() or 2L) + varint(payload.size.toLong()) + payload
+
+private fun fieldString(field: Int, value: String): ByteArray =
+    fieldBytes(field, value.toByteArray(Charsets.UTF_8))
+
+private fun fieldVarint(field: Int, value: Long): ByteArray =
+    varint((field shl 3).toLong()) + varint(value)
+
+private fun styleEntry(key: String, argb: Int): ByteArray {
+    val color = fieldVarint(1, argb.toLong() and 0xFFFFFFFFL)
+    val entry = fieldString(1, key) + fieldBytes(2, color)
+    return fieldBytes(2, entry)
+}
+
+private fun styleSheet(spec: ThemeSpec): ByteArray {
+    val out = ArrayList<Byte>()
+    fun put(bytes: ByteArray) = bytes.forEach(out::add)
+
+    parseColor(spec.background)?.let { color ->
+        put(styleEntry("default_keyboard_background_secondary_color", color))
+        put(styleEntry("default_keyboard_background_primary_color", color))
+    }
+
+    parseColor(spec.primary)?.let { color ->
+        put(styleEntry(
+            "default_generic_accent_color_pressed",
+            blend(color, 0xFF000000.toInt(), 0.16f)
+        ))
+        put(styleEntry("default_generic_accent_color", color))
+        put(styleEntry("color_bottom_indicator_active", color))
+    }
+
+    parseColor(spec.secondary)?.let { color ->
+        put(styleEntry(
+            "default_bordered_key_color_pressed",
+            blend(color, 0xFFFFFFFF.toInt(), 0.65f)
+        ))
+        put(styleEntry("default_bordered_key_color", color))
+    }
+
+    parseColor(spec.tertiary)?.let { color ->
+        put(styleEntry(
+            "default_bordered_key_dark_color_pressed",
+            blend(color, 0xFFFFFFFF.toInt(), 0.65f)
+        ))
+        put(styleEntry("default_bordered_key_dark_color", color))
+        put(styleEntry("color_generic_extension_background_activated", color))
+    }
+
+    return out.toByteArray()
+}
+
+private fun metadata(sheetPath: String, borderPath: String): ByteArray {
+    val out = ArrayList<Byte>()
+    fun put(bytes: ByteArray) = bytes.forEach(out::add)
+
+    for (name in listOf(
+        "style_sheet_color_common.binarypb",
+        "style_sheet_color_label_white.binarypb",
+        "style_sheet_color_expression_dark.binarypb",
+        "style_sheet_color_rules.binarypb",
+        "style_sheet_dynamic_color_rules.binarypb",
+        "style_sheet_dynamic_color_dark.binarypb",
+        sheetPath,
+    )) {
+        put(fieldString(2, name))
+    }
+
+    val borders = ArrayList<Byte>()
+    fun putBorder(bytes: ByteArray) = bytes.forEach(borders::add)
+    putBorder(fieldVarint(1, 1))
+    for (name in listOf(
+        "style_sheet_color_rules_border.binarypb",
+        "style_sheet_dynamic_color_rules_border.binarypb",
+        "style_sheet_dynamic_color_dark_border.binarypb",
+        borderPath,
+    )) {
+        putBorder(fieldString(2, name))
+    }
+    put(fieldBytes(3, borders.toByteArray()))
+
+    val compat = fieldVarint(1, 25) +
+        fieldString(2, "style_sheet_dynamic_compatible_themes_color_rules.binarypb")
+    put(fieldBytes(14, compat))
+    return out.toByteArray()
+}
+
+private data class ThemeAsset(
+    val spec: ThemeSpec,
+    val slug: String,
+    val metadataPath: String,
+    val stylePath: String,
+    val borderPath: String,
+)
+
+private fun buildSpecs(
+    themeName: String,
+    background: String,
+    primary: String,
+    secondary: String,
+    tertiary: String,
+    additional: String,
+): List<ThemeSpec> {
+    val default = normalizeSpec(themeName, background, primary, secondary, tertiary)
+    val extras = parseAdditionalThemes(additional)
+    val unique = LinkedHashMap<String, ThemeSpec>()
+    for (spec in listOf(default) + extras) {
+        unique.putIfAbsent(spec.name.lowercase(Locale.ROOT), spec)
+    }
+    return unique.values.toList()
+}
+
+private fun assetsFor(specs: List<ThemeSpec>): List<ThemeAsset> =
+    specs.mapIndexed { index, spec ->
+        val slug = slugify(spec.name, index)
+        ThemeAsset(
+            spec = spec,
+            slug = slug,
+            metadataPath = "assets/theme/theme_package_metadata_${slug}.binarypb",
+            stylePath = "assets/theme/style_sheet_${slug}.binarypb",
+            borderPath = "assets/theme/style_sheet_${slug}_border.binarypb",
+        )
+    }
+
+private fun escapeSmaliString(value: String): String =
+    value.replace("\\", "\\\\").replace("\"", "\\\"")
+
+private fun injection(specs: List<ThemeSpec>): String {
+    val registrations = assetsFor(specs).joinToString("\n") { asset ->
+        val metadataAsset = "assets:theme_package_metadata_${asset.slug}.binarypb"
+        """
+        const-string v10, "${metadataAsset}"
+        const/4 v11, 0x1
+        new-instance v12, Lqyk;
+        invoke-direct {v12, v10, v11}, Lqyk;-><init>(Ljava/lang/String;Z)V
+        invoke-static {v9, v12}, Lqzd;->a(Landroid/content/Context;Lqyk;)Lqye;
+        move-result-object v11
+        invoke-interface {v11}, Lqye;->c()Lrdd;
+        move-result-object v11
+        const-string v10, "${escapeSmaliString(asset.spec.name)}"
+        invoke-static {v9, v12}, Ljyj;->e(Landroid/content/Context;Lqyk;)Ljyj;
+        move-result-object v11
+        new-instance v12, Ljxq;
+        invoke-direct {v12, v10, v11}, Ljxq;-><init>(Ljava/lang/String;Ljyj;)V
+        invoke-interface {v5, v12}, Ljava/util/List;->add(Ljava/lang/Object;)Z
+        """.trimIndent()
+    }
+
+    return """
+        invoke-virtual {p0}, Landroidx/fragment/app/Fragment;->getContext()Landroid/content/Context;
+        move-result-object v9
+        if-eqz v9, :midnight_red_theme_end
+        $registrations
+        :midnight_red_theme_end
+    """.trimIndent()
+}
+
+private val midnightRedResources = rawResourcePatch(
+    name = "Midnight Red AMOLED Theme Resources",
+    description = "Generates independent Gboard AMOLED theme assets from Morphe options.",
+    default = false,
+) {
+    compatibleWith(compatibility)
+
+    val themeName by themeNameOption()
+    val background by backgroundOption()
+    val primary by primaryOption()
+    val secondary by secondaryOption()
+    val tertiary by tertiaryOption()
+    val additionalThemes by additionalThemesOption()
+
+    execute {
+        val specs = buildSpecs(
+            themeName,
+            background,
+            primary,
+            secondary,
+            tertiary,
+            additionalThemes,
+        )
+        require(specs.isNotEmpty()) { "At least one theme must be defined." }
+
+        assetsFor(specs).forEach { asset ->
+            get(asset.stylePath).writeBytes(styleSheet(asset.spec))
+            get(asset.borderPath).writeBytes(ByteArray(0))
+            get(asset.metadataPath).writeBytes(
+                metadata(
+                    asset.stylePath.substringAfterLast('/'),
+                    asset.borderPath.substringAfterLast('/'),
+                )
+            )
+        }
+    }
 }
 
 val midnightRedTheme = bytecodePatch(
-    name = "Dva.11 Midnight Red Theme",
-    description = "Adds one independent AMOLED Midnight Red Gboard theme with configurable background, primary, secondary, and tertiary colours.",
+    name = "Midnight Red AMOLED Theme",
+    description = "Configurable AMOLED Gboard themes with Midnight Red defaults and optional Material You colors.",
     default = false,
 ) {
-    val backgroundColor by stringOption(
-        name = "Background colour",
-        default = "#000000",
-    )
-    val primaryColor by stringOption(
-        name = "Primary colour",
-        default = "#FF0000",
-    )
-    val secondaryColor by stringOption(
-        name = "Secondary colour",
-        default = "#120404",
-    )
-    val tertiaryColor by stringOption(
-        name = "Tertiary colour",
-        default = "#2A0A0A",
-    )
-
     compatibleWith(compatibility)
+    dependsOn(midnightRedResources)
+
+    val themeName by themeNameOption()
+    val background by backgroundOption()
+    val primary by primaryOption()
+    val secondary by secondaryOption()
+    val tertiary by tertiaryOption()
+    val additionalThemes by additionalThemesOption()
 
     execute {
-        val palette = paletteBytes(
-            background = parseArgb(backgroundColor, "Background colour"),
-            primary = parseArgb(primaryColor, "Primary colour"),
-            secondary = parseArgb(secondaryColor, "Secondary colour"),
-            tertiary = parseArgb(tertiaryColor, "Tertiary colour"),
+        val specs = buildSpecs(
+            themeName,
+            background,
+            primary,
+            secondary,
+            tertiary,
+            additionalThemes,
         )
-
-        // Resource-only mutation.  Unique asset names ensure this patch does not
-        // overwrite or collide with Morphe/Adobo/JasonWu theme assets.
-        get(SHEET_PATH).writeBytes(palette)
-        get(BORDER_PATH).writeBytes(borderBytes)
-        get(METADATA_PATH).writeBytes(metadataBytes)
-
-        val themeListing = Fingerprint(
+        val patchFingerprint = Fingerprint(
             definingClass = "Lcom/google/android/apps/inputmethod/libs/theme/listing/ThemeListingFragment;",
+            name = "f",
             parameters = listOf("Landroid/os/Bundle;"),
             returnType = "V",
         )
 
-        // Inject immediately before the method's final instruction.  The previous
-        // implementation anchored on Ljxu.<init>, which is inside Gboard's theme
-        // construction loop; that caused the new theme to be appended once per
-        // built-in theme and produced the visible duplicates.
-        val instructions = themeListing.method.implementation?.instructions
-            ?: error("Theme listing implementation not found")
-        val insertionIndex = instructions.lastIndex
-        require(insertionIndex >= 0) { "Theme listing method has no instructions" }
+        val instructions = patchFingerprint.method.implementation?.instructions
+            ?: error("ThemeListingFragment.f(Bundle) has no implementation")
+        val endIndex = instructions.lastIndex
+        require(endIndex >= 0) { "ThemeListingFragment.f(Bundle) has no instructions" }
 
-        themeListing.method.addInstructions(
-            insertionIndex,
-            """
-                invoke-virtual {p0}, Landroidx/fragment/app/Fragment;->getContext()Landroid/content/Context;
-                move-result-object v9
-                const-string v10, "$METADATA_PATH"
-                const/4 v11, 0x1
-                new-instance v12, Lqyk;
-                invoke-direct {v12, v10, v11}, Lqyk;-><init>(Ljava/lang/String;Z)V
-                invoke-static {v9, v12}, Lqzd;->a(Landroid/content/Context;Lqyk;)Lqye;
-                move-result-object v10
-                invoke-interface {v10}, Lqye;->c()Lrdd;
-                move-result-object v10
-                invoke-static {v9, v12}, Ljyj;->e(Landroid/content/Context;Lqyk;)Ljyj;
-                move-result-object v10
-                const-string v9, "$THEME_NAME"
-                new-instance v12, Ljxq;
-                invoke-direct {v12, v9, v10}, Ljxq;-><init>(Ljava/lang/String;Ljyj;)V
-                invoke-interface {v5, v12}, Ljava/util/List;->add(Ljava/lang/Object;)Z
-            """.trimIndent(),
+        // Insert immediately before the method's terminal instruction. This avoids
+        // inserting into Gboard's existing theme-enumeration loop.
+        patchFingerprint.method.addInstructions(
+            endIndex,
+            injection(specs),
         )
     }
 }

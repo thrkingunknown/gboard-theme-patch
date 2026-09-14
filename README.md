@@ -1,62 +1,81 @@
-# Gboard Theme Patch
+# Gboard AMOLED Themes
 
-A standalone Morphe patch that adds one isolated `Midnight Red` theme to full Gboard.
-It does not replace Gboard's built-in themes and uses uniquely named assets to avoid
-collisions with other patch bundles.
+Morphe patch source for configurable Gboard AMOLED themes.
 
-## Features
+## Patch
 
-- Pitch-black AMOLED keyboard background by default.
-- Pure-red action/Enter key by default.
-- Dark red modifier/bordered-key tones by default.
-- Four configurable colour options in Morphe:
-  - Background colour
-  - Primary colour
-  - Secondary colour
-  - Tertiary colour
-- Accepts `#RRGGBB` or `#AARRGGBB` values.
-- Package-level compatibility with any Gboard version; the patch fails closed when
-  its theme-listing structure cannot be located.
-- Does not overwrite Gboard's built-in Red/Pitch Black/System Auto/Dynamic Color themes.
+**Midnight Red AMOLED Theme**
 
-## Critical crash/duplication fixes
+Default palette:
 
-The previous implementation had two independent runtime problems:
+- Background: `#000000`
+- Primary / action: `#FF0000`
+- Secondary / normal keys: `#2A0A0A`
+- Tertiary / modifier keys: `#1F0B0B`
 
-1. It used `Bundle` (`p1`) as if it were an Android `Context`, which is invalid for
-   the theme resource loader.
-2. It anchored insertion on `Ljxu.<init>`. That constructor is inside Gboard's
-   theme-building loop, so the custom theme was appended repeatedly.
-3. The constructor receiver was previously allocated as `Ljyj` and invoked as
-   `Ljxq`, causing ART's `VerifyError`.
+The patch declares Gboard package compatibility without a version target, so Morphe
+reports the supported Gboard version as **Any**. The implementation was developed
+against the supplied Gboard `18.0.3.954559732` APKM.
 
-The current patch obtains a real `Context` from the fragment, allocates the
-`Ljxq` receiver as `Ljxq`, and injects immediately before the method's final
-instruction so the registration happens once after the built-in theme loop.
+## Morphe customization
 
-## Compatibility / coexistence
+The patch exposes options directly in Morphe:
 
-The patch only writes:
+- Theme name
+- Background colour
+- Primary/action colour
+- Secondary/normal-key colour
+- Tertiary/modifier-key colour
+- Additional themes
 
-- `assets/theme/theme_package_metadata_midnight_red.binarypb`
-- `assets/theme/style_sheet_color_mrd.binarypb`
-- `assets/theme/style_sheet_color_mrd_border.binarypb`
+Each colour accepts `#RRGGBB`, `#AARRGGBB`, or `Material You`.
 
-No existing theme asset is replaced. The patch has no dependency on Morphe,
-Adobo, or JasonWu Gboard patch bundles.
+`Material You` uses Gboard's native dynamic-colour dark theme as the base; the
+requested role is left to Gboard's dynamic palette while other roles can remain
+custom.
 
-## Build
+### Multiple themes
 
-Use **GitHub Actions → Build Morphe Patch → Run workflow**.
+Enter one theme per line:
 
-The workflow performs source checks, builds the `.mpp`, validates its ZIP structure,
-calculates SHA-256, and optionally publishes the exact `v1.0.0` release.
+```text
+Crimson|#000000|#FF1744|#22070B|#3A0C12
+Cyber Red|#000000|#FF0033|#180008|Material You
+```
 
-## Important verification limitation
+Format:
 
-A patch bundle can be compiled and structurally validated without proving that a
-specific obfuscated Gboard build accepts the injected method. Final runtime
-validation still requires applying the generated `.mpp` to a real Gboard APK and
-opening **Settings → Theme**. The CI therefore treats fingerprint resolution and
-APK/Dex verification as separate checks rather than claiming that a compile alone
-proves runtime compatibility.
+```text
+Name|Background|Primary|Secondary|Tertiary
+```
+
+Duplicate names are collapsed.
+
+## Theme registration
+
+The patch inserts registrations immediately before the terminal instruction of
+`ThemeListingFragment.f(Bundle)`. It does not anchor to Gboard's existing theme
+constructor loop, which was the source of the previous duplicate-theme behavior.
+
+The injected code obtains a real `Context` through `Fragment.getContext()` and
+allocates the `Ljxq` receiver with the correct type before invoking its constructor.
+
+Theme metadata/assets are generated at patch time and use unique `mrd_*` filenames;
+the built-in Gboard themes are not overwritten.
+
+## Build / release
+
+Use:
+
+**Actions -> Build Morphe Patch -> Run workflow**
+
+The manual workflow provides:
+
+- **Publish to releases** — create a GitHub Release after a successful build.
+- **Version** — enter `1.0.0`, `1.0.0-beta.1`, etc.
+- **Release type** — `release` or `pre-release`.
+
+The `.mpp` and SHA-256 checksum are always uploaded as workflow artifacts.
+
+The workflow uses the current Morphe template action family: checkout 7, setup-java 6,
+setup-gradle 6, upload-artifact 7, JDK 21, and Gradle 8.14.4.

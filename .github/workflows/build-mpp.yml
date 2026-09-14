@@ -3,35 +3,69 @@ name: Build Morphe Patch
 on:
   workflow_dispatch:
     inputs:
-      publish_release:
-        description: "Publish v1.0.0 to GitHub Releases"
+      publish_to_releases:
+        description: Publish to releases
         required: true
         default: false
         type: boolean
+      version:
+        description: Version (for example 1.0.0 or 1.0.0-beta.1)
+        required: true
+        default: 1.0.0
+        type: string
+      release_type:
+        description: Release type
+        required: true
+        default: release
+        type: choice
+        options:
+          - release
+          - pre-release
 
 permissions:
   contents: write
   packages: read
 
+concurrency:
+  group: gboard-amoled-build-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
     name: Build and verify .mpp
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up JDK 21
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v6
         with:
           distribution: temurin
-          java-version: "21"
+          java-version: '21'
           cache: gradle
 
       - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v6
         with:
-          gradle-version: "8.14"
+          gradle-version: '8.14.4'
+
+      - name: Validate inputs
+        shell: bash
+        env:
+          VERSION: ${{ inputs.version }}
+          RELEASE_TYPE: ${{ inputs.release_type }}
+        run: |
+          set -euo pipefail
+          [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+([.-][0-9A-Za-z.-]+)?$ ]] || {
+            echo "Invalid version: $VERSION"
+            exit 1
+          }
+          [[ "$RELEASE_TYPE" == "release" || "$RELEASE_TYPE" == "pre-release" ]] || {
+            echo "Invalid release type: $RELEASE_TYPE"
+            exit 1
+          }
 
       - name: Static source verification
         shell: bash
@@ -39,76 +73,109 @@ jobs:
           set -euo pipefail
           python - <<'PY'
           from pathlib import Path
-          p = Path("patches/src/main/kotlin/dev/dva11/gboard/MidnightRedThemePatch.kt")
-          s = p.read_text(encoding="utf-8")
+
+          s = Path("patches/src/main/kotlin/dev/dva11/gboard/MidnightRedThemePatch.kt").read_text()
+          b = Path("patches/build.gradle.kts").read_text()
+
           required = [
-              'name = "Dva.11 Midnight Red Theme"',
-              'packageName = PACKAGE_NAME',
-              'AppTarget' not in s,
-              'getContext()Landroid/content/Context;',
+              'definingClass = "Lcom/google/android/apps/inputmethod/libs/theme/listing/ThemeListingFragment;"',
+              'parameters = listOf("Landroid/os/Bundle;")',
+              'themeListing',
+              'implementation?.instructions',
+              'addInstructions(',
+              'Landroidx/fragment/app/Fragment;->getContext()Landroid/content/Context;',
               'new-instance v12, Ljxq;',
-              'invoke-direct {v12, v9, v10}, Ljxq;-><init>(Ljava/lang/String;Ljyj;)V',
-              'invoke-interface {v5, v12}, Ljava/util/List;->add(Ljava/lang/Object;)Z',
-              'val insertionIndex = instructions.lastIndex',
+              'invoke-direct {v12, v10, v11}, Ljxq;-><init>(Ljava/lang/String;Ljyj;)V',
+              'stringOption(name = "Background',
+              'Additional themes:',
           ]
-          assert all(required), required
+          for item in required:
+              assert item in s, item
+
+          assert 'AppTarget(' not in s
+          assert 'Ljxu;' not in s
           assert 'new-instance v12, Ljyj;' not in s
-          assert 'invoke-static {p1, v11}' not in s
-          assert 'definingClass = "Ljxu;"' not in s
-          print("Static patch safety checks passed")
+          assert 'anchor.index' not in s
+          assert 'anchor.index + 1' not in s
+          assert 'contact = "https://github.com/thrkingunknown"' in b
+          assert 'name = "Gboard AMOLED Themes"' in b
+          print("Static verification passed")
           PY
 
-      - name: Clean previous outputs
-        run: rm -rf patches/build
-
-      - name: Build
+      - name: Build .mpp
         env:
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gradle :patches:buildAndroid --no-daemon --stacktrace
+          VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          gradle buildAndroid -Pversion="$VERSION" --no-daemon --stacktrace
 
-      - name: Verify generated bundle
+      - name: Verify .mpp
         shell: bash
+        env:
+          VERSION: ${{ inputs.version }}
         run: |
           set -euo pipefail
           shopt -s nullglob
           files=(patches/build/libs/*.mpp)
-          test "${#files[@]}" -eq 1
-          file="${files[0]}"
-          unzip -t "$file"
-          python - "$file" <<'PY'
-          import sys, zipfile
-          from pathlib import Path
-          p = Path(sys.argv[1])
-          with zipfile.ZipFile(p) as z:
-              names = set(z.namelist())
-              assert any(n.endswith(".dex") for n in names), "MPP has no compiled DEX"
-              assert any(n.endswith(".json") for n in names), "MPP has no patch metadata"
-          print(f"Verified: {p.name}")
-          PY
-          sha256sum "$file" | tee patches/build/libs/SHA256SUMS.txt
+          if [[ "${#files[@]}" -ne 1 ]]; then
+            echo "Expected exactly one .mpp, found ${#files[@]}"
+            find patches/build/libs -maxdepth 1 -type f -print || true
+            exit 1
+          fi
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
+          mpp="${files[0]}"
+          expected="patches-${VERSION}.mpp"
+          if [[ "$(basename "$mpp")" != "$expected" ]]; then
+            echo "Expected $expected but got $(basename "$mpp")"
+            exit 1
+          fi
+
+          unzip -t "$mpp"
+          sha256sum "$mpp" > patches/build/libs/SHA256SUMS.txt
+          printf 'MPP=%s\n' "$mpp" >> "$GITHUB_ENV"
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v7
         with:
-          name: Dva11-Gboard-Midnight-Red-v1.0.0
+          name: Gboard-AMOLED-Themes-${{ inputs.version }}
           path: |
             patches/build/libs/*.mpp
             patches/build/libs/SHA256SUMS.txt
           if-no-files-found: error
           retention-days: 30
 
-      - name: Publish v1.0.0 release
-        if: ${{ inputs.publish_release == true }}
+      - name: Publish to releases
+        if: ${{ inputs.publish_to_releases }}
         env:
           GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ inputs.version }}
+          RELEASE_TYPE: ${{ inputs.release_type }}
+          MPP: ${{ env.MPP }}
         shell: bash
         run: |
           set -euo pipefail
-          shopt -s nullglob
-          files=(patches/build/libs/*.mpp)
-          test "${#files[@]}" -eq 1
-          gh release view v1.0.0 >/dev/null 2>&1 || gh release create v1.0.0 \
-            --title "Dva.11 Gboard Midnight Red v1.0.0" \
-            --notes "Standalone Gboard Midnight Red Morphe patch."
-          gh release upload v1.0.0 "${files[0]}" patches/build/libs/SHA256SUMS.txt --clobber
+
+          tag="v${VERSION}"
+          title="Gboard AMOLED Themes v${VERSION}"
+
+          if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "Release/tag $tag already exists. Refusing to overwrite it."
+            exit 1
+          fi
+
+          if [[ "$RELEASE_TYPE" == "pre-release" ]]; then
+            gh release create "$tag" "$MPP" patches/build/libs/SHA256SUMS.txt \
+              --repo "$GITHUB_REPOSITORY" \
+              --target "$GITHUB_SHA" \
+              --title "$title" \
+              --generate-notes \
+              --prerelease
+          else
+            gh release create "$tag" "$MPP" patches/build/libs/SHA256SUMS.txt \
+              --repo "$GITHUB_REPOSITORY" \
+              --target "$GITHUB_SHA" \
+              --title "$title" \
+              --generate-notes
+          fi
