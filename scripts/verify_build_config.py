@@ -20,4 +20,7 @@ assert 'cache-dependency-path: package-lock.json' in workflow
 assert 'gradle/actions/setup-gradle@v6' in workflow
 assert "gradle-version: '9.7.1'" in workflow
 assert 'gradle wrapper --gradle-version 9.7.1' in workflow
+assert "version =" not in build
+assert '-Xcontext-parameters' in build
+
 print("Build configuration verification passed")

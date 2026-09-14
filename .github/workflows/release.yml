@@ -76,6 +76,14 @@ jobs:
       - name: Verify CI, release, and cache configuration
         run: python3 .github/scripts/verify_ci_config.py
 
+      - name: Verify release version plumbing
+        run: |
+          set -euo pipefail
+          test -f gradle.properties
+          grep -Eq '^version[[:space:]]*=[[:space:]]*[^[:space:]]+' gradle.properties
+          test -z "$(grep -nE '^[[:space:]]*version[[:space:]]*=' patches/build.gradle.kts || true)"
+          echo "Release version is controlled by root gradle.properties"
+
       - name: Release
         uses: cycjimmy/semantic-release-action@v6
         id: release

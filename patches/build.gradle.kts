@@ -1,6 +1,7 @@
 group = "dev.thrkingunknown.gboard"
-version = "1.0.3"
 
+// The release version is supplied by the root Gradle version during semantic-release.
+// Do not override it here, or the generated .mpp filename can remain on an older version.
 patches {
     about {
         name = "Gboard AMOLED Theme Studio"
@@ -10,6 +11,12 @@ patches {
         contact = "https://github.com/thrkingunknown"
         website = "https://github.com/thrkingunknown/gboard-theme-patch"
         license = "GPLv3"
+    }
+}
+
+kotlin {
+    compilerOptions {
+        freeCompilerArgs.add("-Xcontext-parameters")
     }
 }
 
