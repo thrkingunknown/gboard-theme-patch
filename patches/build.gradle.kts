@@ -13,7 +13,7 @@ patches {
     }
 }
 
-// Keep the patcher version aligned with the app.morphe.patches 1.3.3 toolchain.
+// Keep the patcher version aligned with the app.morphe.patches 1.3.4 toolchain.
 // Do not upgrade morphe-patcher independently without upgrading the Morphe/Kotlin toolchain.
 
 // Match the Morphe template: Gson is available to the generated patch-list task

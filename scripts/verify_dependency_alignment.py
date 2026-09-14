@@ -5,10 +5,9 @@ settings = Path("settings.gradle.kts").read_text()
 build = Path("patches/build.gradle.kts").read_text()
 generator = Path("patches/src/main/kotlin/util/PatchListGenerator.kt").read_text()
 
-assert 'morphe-patcher = "1.7.0"' in catalog
-assert 'id("app.morphe.patches") version "1.3.3"' in settings
+assert 'morphe-patcher = "1.13.0"' in catalog
+assert 'id("app.morphe.patches") version "1.3.4"' in settings
 assert 'mavenLocal()' in settings
-assert 'morphe-patcher = "1.13.0"' not in catalog
 assert '-Xcontext-parameters' not in build
 assert 'patch.category' not in generator
 assert 'target.minSdk' not in generator
