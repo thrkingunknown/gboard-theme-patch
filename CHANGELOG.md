@@ -1,3 +1,9 @@
+## [1.0.7](https://github.com/thrkingunknown/gboard-theme-patch/compare/v1.0.6...v1.0.7) (2026-09-14)
+
+### 🐛 Bug Fixes
+
+* idk ([dd7aa3b](https://github.com/thrkingunknown/gboard-theme-patch/commit/dd7aa3bcec1146a75c66d08a10b19debf42168c3))
+
 ## [1.0.6](https://github.com/thrkingunknown/gboard-theme-patch/compare/v1.0.5...v1.0.6) (2026-09-14)
 
 ### 🐛 Bug Fixes
