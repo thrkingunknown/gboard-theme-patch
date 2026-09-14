@@ -1,6 +1,6 @@
 {
   "name": "Gboard AMOLED Theme Studio",
-  "version": "1.0.0",
+  "version": "1.0.3",
   "package": "com.google.android.inputmethod.latin",
   "supportedVersion": "Any",
   "defaultTheme": {
@@ -14,18 +14,6 @@
     "enabled": true,
     "format": "Name|Background|Primary|Secondary|Tertiary",
     "separator": ";;",
-    "acceptedSeparators": [
-      ";;",
-      ";",
-      "\n"
-    ],
-    "emptyValue": "(none)",
-    "invalidEntries": "ignored"
-  },
-  "metadata": {
-    "repository": "https://github.com/thrkingunknown/gboard-theme-patch",
-    "rawUrl": "https://raw.githubusercontent.com/thrkingunknown/gboard-theme-patch/main/patches-bundle.json",
-    "managerSourceUrl": "https://github.com/thrkingunknown/gboard-theme-patch",
-    "format": "Morphe patches-bundle.json"
+    "emptyValue": "(none)"
   }
 }

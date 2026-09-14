@@ -72,40 +72,12 @@ private fun parseAdditionalThemes(value: String): List<ThemeSpec> {
     val input = value.trim()
     if (input.isEmpty() || input.equals("(none)", ignoreCase = true)) return emptyList()
 
-    // Morphe string options are plain text. Be deliberately tolerant here so a
-    // blank line, trailing separator, or shorthand entry cannot abort the whole
-    // patch. The default theme remains available even when an extra entry is bad.
-    val entries = input
-        .replace("\r\n", "\n")
-        .replace('\r', '\n')
-        .split(";;", ";", "\n")
-        .map { it.trim().trim('`', '"', '\'') }
-        .filter { it.isNotBlank() && !it.equals("(none)", ignoreCase = true) }
-
-    return entries.mapNotNull { entry ->
-        val fields = entry.split('|').map(String::trim)
-        val padded = (fields + List(5) { "" }).take(5)
-
-        // A name-only entry uses the default palette; a partial entry uses
-        // defaults for omitted colors. This keeps Additional themes functional
-        // even when the manager supplies a shortened or partially empty value.
-        val spec = normalizeSpec(
-            padded[0],
-            padded[1],
-            padded[2],
-            padded[3],
-            padded[4],
-        )
-
-        // Ignore malformed color entries instead of failing the entire patch.
-        // The primary/default theme is still generated normally.
-        runCatching {
-            parseColor(spec.background)
-            parseColor(spec.primary)
-            parseColor(spec.secondary)
-            parseColor(spec.tertiary)
-            spec
-        }.getOrNull()
+    return input.split(";;").mapIndexed { index, entry ->
+        val fields = entry.trim().split('|', limit = 5)
+        require(fields.size == 5) {
+            "Additional theme #${index + 1} must use: Name|Background|Primary|Secondary|Tertiary"
+        }
+        normalizeSpec(fields[0], fields[1], fields[2], fields[3], fields[4])
     }
 }
 

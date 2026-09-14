@@ -19,30 +19,14 @@ Colours accept `#RRGGBB` or `#AARRGGBB`.
 
 The **Additional themes** option is functional.
 
-Preferred format:
+Format:
 `Name|Background|Primary|Secondary|Tertiary`
 
-Separate multiple themes with `;;` (new lines and single `;` are also accepted):
+Separate multiple themes with `;;`:
 `Ocean|#000000|#00B7FF|#08202A|#123C4A;;Purple|#000000|#B56CFF|#24113A|#40205C`
 
 The default Midnight Red theme is always generated from the five primary options.
-Duplicate names are collapsed case-insensitively. Blank/trailing entries are ignored.
-A name-only or partial entry uses the default palette for omitted colors. Invalid-color
-entries are ignored instead of aborting the entire patch.
-
-## Morphe source metadata
-
-This patch bundle is usable as a local `.mpp` regardless of remote metadata. For a **Remote** Morphe source, the GitHub repository itself must be publicly reachable and the file below must exist on its `main` branch:
-
-Repository:
-`https://github.com/thrkingunknown/gboard-theme-patch`
-
-Metadata:
-`https://raw.githubusercontent.com/thrkingunknown/gboard-theme-patch/main/patches-bundle.json`
-
-Morphe Manager resolves a GitHub repository source to `patches-bundle.json` on the repository's `main` branch. **Metadata N/A means Manager could not fetch that remote JSON; it is not an MPP patch-code failure.** citeturn883791search1turn883791search0
-
-After the repository and release are actually published, remove the old `Metadata N/A` source entry and re-add either the repository URL above or the direct raw JSON URL. If the repository is private, use the `.mpp` as a Local source instead; a private GitHub repository cannot provide public remote metadata to Morphe Manager.
+Duplicate names are collapsed case-insensitively. Malformed entries fail explicitly.
 
 ## Compatibility
 
@@ -69,7 +53,7 @@ Project/release version is managed by semantic-release; the generated release me
 
 
 <!-- PATCHES_START -->
-> **[v1.0.0](https://github.com/thrkingunknown/gboard-theme-patch/releases/tag/v1.0.0)** • `main` • 1 patches total
+> **[v1.0.3](https://github.com/thrkingunknown/gboard-theme-patch/releases/tag/v1.0.3)** • `main` • 1 patches total
 <details open>
 <summary>📦 Gboard • 1 patch</summary>
 <br>

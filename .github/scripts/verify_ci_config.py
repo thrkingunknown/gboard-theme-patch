@@ -22,10 +22,9 @@ checks = [
     ("prepareCmd", releaserc),
     ("mainClass.set(\"util.PatchListGeneratorKt\")", Path("patches/build.gradle.kts").read_text()),
     ("Ensure Morphe dev branch exists", release),
+    ("Verify published Morphe metadata", release),
     ("git push origin HEAD:refs/heads/dev", release),
-    ("Sync release metadata to release branch", release),
-    ("git push origin \"refs/tags/${TAG}:refs/heads/${BRANCH}\"", release),
-]
+        ]
 for needle, haystack in checks:
     assert needle in haystack, needle
 assert "npm ci" not in release
@@ -47,8 +46,4 @@ assert bundle["download_url"].endswith(
     f"/v{project_version}/patches-{project_version}.mpp"
 ), "patches-bundle.json download_url does not match project version"
 assert json.loads(Path("patches-list.json").read_text())["version"] == project_version
-assert bundle.get("created_at"), "patches-bundle.json missing created_at"
-assert isinstance(bundle.get("description"), str) and bundle["description"].strip(), "patches-bundle.json missing description"
-assert bundle.get("download_url", "").startswith("https://github.com/")
-assert bundle.get("signature_download_url", "") == "" or bundle["signature_download_url"].startswith("https://github.com/")
 print("CI/release/cache/generator configuration verification passed")

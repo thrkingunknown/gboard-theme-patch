@@ -47,9 +47,6 @@ jobs:
           cache-read-only: false
 
       - name: Ensure Gradle wrapper is present
-        env:
-          GITHUB_ACTOR: ${{ github.actor }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           if [ ! -f gradle/wrapper/gradle-wrapper.jar ]; then
             gradle wrapper --gradle-version 9.7.1
@@ -57,9 +54,6 @@ jobs:
           test -f gradle/wrapper/gradle-wrapper.jar
           chmod +x gradlew
 
-      # The Morphe template expects a permanent dev branch for prereleases and
-      # back-merging stable releases. Create it automatically for repositories
-      # that were created without the template's second branch.
       - name: Ensure Morphe dev branch exists
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -71,7 +65,6 @@ jobs:
             git push origin HEAD:refs/heads/dev
           fi
 
-      # The Morphe template uses semantic-release to build and publish the MPP.
       - name: Verify CI, release, and cache configuration
         run: python3 .github/scripts/verify_ci_config.py
 
@@ -81,36 +74,30 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # semantic-release creates the release commit and tag, but the historical
-      # repository state can leave the branch ref one commit behind the tag.
-      # Morphe Manager reads metadata from the repository default branch, so
-      # make the release commit reachable from the active release branch.
-      - name: Sync release metadata to release branch
+      # Verify the exact public metadata and release asset that Morphe Manager will consume.
+      # This catches broken/partial releases before the workflow is considered successful.
+      - name: Verify published Morphe metadata
         if: steps.release.outputs.new_release_published == 'true'
         env:
           VERSION: ${{ steps.release.outputs.new_release_version }}
-          BRANCH: ${{ github.ref_name }}
+          REPOSITORY: ${{ github.repository }}
         run: |
           set -euo pipefail
-          git fetch --force origin "refs/heads/${BRANCH}:refs/remotes/origin/${BRANCH}" --tags
-          TAG="v${VERSION}"
-          if git merge-base --is-ancestor "origin/${BRANCH}" "${TAG}"; then
-            git push origin "refs/tags/${TAG}:refs/heads/${BRANCH}"
-            echo "${BRANCH} fast-forwarded to ${TAG}; release metadata is now on the branch."
-          elif git merge-base --is-ancestor "${TAG}" "origin/${BRANCH}"; then
-            echo "${BRANCH} already contains ${TAG}; no branch update required."
-          else
-            echo "ERROR: ${BRANCH} and ${TAG} have diverged; refusing a force push."
-            exit 1
-          fi
-
-      - name: Verify published Morphe metadata
-        if: steps.release.outputs.new_release_published == 'true' && github.ref_name == 'main'
-        env:
-          GITHUB_REPOSITORY: ${{ github.repository }}
-          METADATA_BRANCH: main
-          EXPECTED_VERSION: ${{ steps.release.outputs.new_release_version }}
-        run: python3 .github/scripts/verify_published_metadata.py
+          META_URL="https://raw.githubusercontent.com/${REPOSITORY}/refs/heads/main/patches-bundle.json"
+          curl --fail --silent --show-error --location --retry 5 --retry-delay 2 "$META_URL" -o /tmp/patches-bundle.json
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          version = os.environ['VERSION']
+          bundle = json.loads(Path('/tmp/patches-bundle.json').read_text())
+          expected = f"https://github.com/{os.environ['REPOSITORY']}/releases/download/v{version}/patches-{version}.mpp"
+          assert bundle['version'] == version, (bundle['version'], version)
+          assert bundle['download_url'] == expected, (bundle['download_url'], expected)
+          print(f"Published metadata verified: v{version}")
+          PY
+          DOWNLOAD_URL="https://github.com/${REPOSITORY}/releases/download/v${VERSION}/patches-${VERSION}.mpp"
+          curl --fail --silent --show-error --location --retry 5 --retry-delay 2 -o /dev/null "$DOWNLOAD_URL"
+          echo "Published MPP verified: $DOWNLOAD_URL"
 
       - name: Attest
         if: steps.release.outputs.new_release_published == 'true'
@@ -119,7 +106,6 @@ jobs:
           subject-name: 'Morphe Patches ${{ steps.release.outputs.new_release_git_tag }}'
           subject-path: patches/build/libs/patches-*.mpp
 
-      # Verify compilation when no release was produced (docs/chore/non-release branches).
       - name: Verify project compiles
         if: steps.release.outputs.new_release_published != 'true'
         env:

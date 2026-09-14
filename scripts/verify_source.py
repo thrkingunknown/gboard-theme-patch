@@ -10,9 +10,8 @@ assert 'new-instance v12, Ljxq;' in s
 assert 'new-instance v12, Ljyj;' not in s
 assert 'definingClass = "Ljxu;"' not in s
 assert 'val endIndex = instructions.lastIndex' in s
-assert 'split(";;", ";", \"\\n\")' in s
-assert 'mapNotNull' in s
-assert 'runCatching {' in s
+assert 'split(";;")' in s
+assert 'Additional theme #' in s
 for x in ['DEFAULT_THEME_NAME','DEFAULT_BACKGROUND','DEFAULT_PRIMARY','DEFAULT_SECONDARY','DEFAULT_TERTIARY']:
     assert f'default = {x}' in s
 assert 'default = "(none)"' in s
@@ -21,6 +20,4 @@ props=(ROOT/"gradle.properties").read_text()
 version=next(line.split("=",1)[1].strip() for line in props.splitlines() if line.startswith("version="))
 assert m["version"]==version
 assert m["package"]=="com.google.android.inputmethod.latin" and m["supportedVersion"]=="Any"
-assert m["metadata"]["rawUrl"] == "https://raw.githubusercontent.com/thrkingunknown/gboard-theme-patch/main/patches-bundle.json"
-assert m["metadata"]["managerSourceUrl"] == "https://github.com/thrkingunknown/gboard-theme-patch"
 print("PASS: source invariants")
