@@ -72,8 +72,16 @@ private fun parseAdditionalThemes(value: String): List<ThemeSpec> {
     val input = value.trim()
     if (input.isEmpty() || input.equals("(none)", ignoreCase = true)) return emptyList()
 
-    return input.split(";;").mapIndexed { index, entry ->
-        val fields = entry.trim().split('|', limit = 5)
+    // Ignore empty entries caused by leading/trailing/repeated `;;` separators.
+    // This prevents a blank optional field from crashing the patch while still
+    // rejecting genuinely malformed non-empty entries.
+    val entries = input
+        .split(";;")
+        .map(String::trim)
+        .filter(String::isNotEmpty)
+
+    return entries.mapIndexed { index, entry ->
+        val fields = entry.split('|', limit = 5)
         require(fields.size == 5) {
             "Additional theme #${index + 1} must use: Name|Background|Primary|Secondary|Tertiary"
         }

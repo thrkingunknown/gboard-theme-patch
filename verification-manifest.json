@@ -14,10 +14,17 @@
     "enabled": true,
     "format": "Name|Background|Primary|Secondary|Tertiary",
     "separator": ";;",
-    "emptyValue": "(none)"
+    "emptyValue": "(none)",
+    "blankEntries": "ignored",
+    "malformedNonEmptyEntries": "rejected"
   },
   "runtimeSafety": {
     "contextLookup": "reflection on ThemeListingFragment.getContext()",
     "avoidsDirectAndroidxFragmentInvoke": true
+  },
+  "ci": {
+    "morpheGradlePluginVersion": "1.3.3",
+    "morphePluginRepository": "https://maven.pkg.github.com/MorpheApp/registry",
+    "githubPackagesAuthRequired": true
   }
 }

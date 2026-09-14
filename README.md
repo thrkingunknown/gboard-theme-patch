@@ -26,7 +26,7 @@ Separate multiple themes with `;;`:
 `Ocean|#000000|#00B7FF|#08202A|#123C4A;;Purple|#000000|#B56CFF|#24113A|#40205C`
 
 The default Midnight Red theme is always generated from the five primary options.
-Duplicate names are collapsed case-insensitively. Malformed entries fail explicitly.
+Blank entries from leading/trailing/repeated `;;` separators are ignored. Duplicate names are collapsed case-insensitively. Non-empty malformed entries fail explicitly.
 
 ## Compatibility
 
@@ -67,3 +67,7 @@ Project/release version is managed by semantic-release; the generated release me
 ### Runtime safety
 
 The theme-list injection resolves `getContext()` through the concrete runtime class of `ThemeListingFragment`. It does not invoke `androidx.fragment.app.Fragment` directly, because current Gboard builds may use a different fragment base class. This avoids ART verifier failures caused by an invalid receiver type.
+
+### CI / Gradle
+
+The Morphe Gradle plugin is resolved from Morphe's GitHub Package Registry. GitHub Actions exposes `GITHUB_ACTOR` and `GITHUB_TOKEN` at job scope so the plugin can be resolved during the initial Gradle settings phase, including wrapper/bootstrap checks. CI also performs an explicit credentials preflight before invoking Gradle, preventing an opaque "plugin not found" error when package authentication is missing.

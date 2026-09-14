@@ -7,12 +7,14 @@ assert 'packageName = PACKAGE_NAME' in s
 assert 'AppTarget(' not in s
 assert 'getMethod(Ljava/lang/String;[Ljava/lang/Class;)Ljava/lang/reflect/Method;' in s
 assert 'Method;->invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;' in s
+assert 'Ljava/lang/Class;->getMethod(Ljava/lang/String;[Ljava/lang/Class;)Ljava/lang/reflect/Method;' in s
 assert 'Landroidx/fragment/app/Fragment;->getContext()' not in s
 assert 'new-instance v12, Ljxq;' in s
 assert 'new-instance v12, Ljyj;' not in s
 assert 'definingClass = "Ljxu;"' not in s
 assert 'val endIndex = instructions.lastIndex' in s
 assert 'split(";;")' in s
+assert '.filter(String::isNotEmpty)' in s
 assert 'Additional theme #' in s
 for x in ['DEFAULT_THEME_NAME','DEFAULT_BACKGROUND','DEFAULT_PRIMARY','DEFAULT_SECONDARY','DEFAULT_TERTIARY']:
     assert f'default = {x}' in s

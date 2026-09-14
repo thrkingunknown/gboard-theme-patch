@@ -20,4 +20,7 @@ assert 'cache-dependency-path: package-lock.json' in workflow
 assert 'gradle/actions/setup-gradle@v6' in workflow
 assert "gradle-version: '9.7.1'" in workflow
 assert 'gradle wrapper --gradle-version 9.7.1' in workflow
+assert 'Verify Morphe package credentials' in workflow
+assert 'GITHUB_ACTOR: ${{ github.actor }}' in workflow
+assert 'GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}' in workflow
 print("Build configuration verification passed")
