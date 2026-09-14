@@ -1,6 +1,7 @@
 package dev.dva11.gboard
 
 import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.patch.*
 
 import java.util.Locale
@@ -21,20 +22,12 @@ private val compatibility = Compatibility(
     // No targets: Morphe reports this patch as compatible with Any Gboard version.
 )
 
-private val themeNameOption = stringOption(name = "Theme name")
-private val backgroundOption = stringOption(name = "Background (#RRGGBB/#AARRGGBB or Material You)")
-private val primaryOption = stringOption(
-    name = "Primary / action (#RRGGBB/#AARRGGBB or Material You)"
-)
-private val secondaryOption = stringOption(
-    name = "Secondary / normal keys (#RRGGBB/#AARRGGBB or Material You)"
-)
-private val tertiaryOption = stringOption(
-    name = "Tertiary / modifier keys (#RRGGBB/#AARRGGBB or Material You)"
-)
-private val additionalThemesOption = stringOption(
-    name = "Additional themes: Name|Background|Primary|Secondary|Tertiary (one per line)"
-)
+private val themeNameOption = stringOption(key = "Theme name")
+private val backgroundOption = stringOption(key = "Background")
+private val primaryOption = stringOption(key = "Primary / action")
+private val secondaryOption = stringOption(key = "Secondary / normal keys")
+private val tertiaryOption = stringOption(key = "Tertiary / modifier keys")
+private val additionalThemesOption = stringOption(key = "Additional themes")
 
 private data class ThemeSpec(
     val name: String,
@@ -298,12 +291,12 @@ private val midnightRedResources = rawResourcePatch(
 
     execute {
         val specs = buildSpecs(
-            themeName,
-            background,
-            primary,
-            secondary,
-            tertiary,
-            additionalThemes,
+            themeName ?: DEFAULT_THEME_NAME,
+            background ?: DEFAULT_BACKGROUND,
+            primary ?: DEFAULT_PRIMARY,
+            secondary ?: DEFAULT_SECONDARY,
+            tertiary ?: DEFAULT_TERTIARY,
+            additionalThemes ?: "",
         )
         require(specs.isNotEmpty()) { "At least one theme must be defined." }
 
@@ -337,12 +330,12 @@ val midnightRedTheme = bytecodePatch(
 
     execute {
         val specs = buildSpecs(
-            themeName,
-            background,
-            primary,
-            secondary,
-            tertiary,
-            additionalThemes,
+            themeName ?: DEFAULT_THEME_NAME,
+            background ?: DEFAULT_BACKGROUND,
+            primary ?: DEFAULT_PRIMARY,
+            secondary ?: DEFAULT_SECONDARY,
+            tertiary ?: DEFAULT_TERTIARY,
+            additionalThemes ?: "",
         )
         val themeListing = Fingerprint(
             definingClass = "Lcom/google/android/apps/inputmethod/libs/theme/listing/ThemeListingFragment;",
