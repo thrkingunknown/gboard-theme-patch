@@ -27,6 +27,7 @@ checks = [
     ("git push origin HEAD:refs/heads/dev", release),
     ("Bootstrap pinned Morphe toolchain", release),
     ("publishToMavenLocal", release),
+    ("--exclude-task signMorphe-patcher-publicationPublication", release),
     ("cp .gradle-deps/morphe-patcher/gradle/wrapper/gradle-wrapper.jar gradle/wrapper/gradle-wrapper.jar", release),
 ]
 for needle, haystack in checks:
@@ -53,6 +54,7 @@ assert 'includeBuild(localMorphePlugin)' in settings_text
 assert "mavenLocal()" in settings_text
 assert "maven.pkg.github.com/MorpheApp/registry" not in settings_text
 assert "maven.pkg.github.com/MorpheApp/registry" not in release
+assert "--exclude-task signMorphe-patcher-publicationPublication" in release
 bootstrap = release.index("Bootstrap pinned Morphe toolchain")
 release_action = release.index("uses: cycjimmy/semantic-release-action@v6")
 assert bootstrap < release_action

@@ -83,7 +83,7 @@ jobs:
           chmod +x .gradle-deps/morphe-patcher/gradlew
 
           # Build/publish Patcher using its own wrapper BEFORE the root project is evaluated.
-          (cd .gradle-deps/morphe-patcher && ./gradlew publishToMavenLocal --no-daemon --stacktrace)
+          (cd .gradle-deps/morphe-patcher && ./gradlew publishToMavenLocal --no-daemon --stacktrace --exclude-task signMorphe-patcher-publicationPublication)
 
           # The root wrapper bootstrap must never invoke the root settings script: that
           # script needs the local Morphe plugin source above. Reuse the pinned Patcher
@@ -93,7 +93,8 @@ jobs:
 
           test -f gradle/wrapper/gradle-wrapper.jar
           test -f "$HOME/.m2/repository/app/morphe/morphe-patcher/1.13.0/morphe-patcher-1.13.0.jar"
-          echo "Pinned Morphe plugin source and Patcher are ready"
+          test -f "$HOME/.m2/repository/app/morphe/morphe-patcher/1.13.0/morphe-patcher-1.13.0.pom"
+          echo "Pinned Morphe plugin source and unsigned local Patcher publication are ready"
 
       - name: Ensure Morphe dev branch exists
         env:

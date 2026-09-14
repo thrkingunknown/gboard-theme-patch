@@ -25,7 +25,7 @@ clone_tag MorpheApp/morphe-patcher v1.13.0 1.13.0 .gradle-deps/morphe-patcher
 test -f .gradle-deps/morphe-patcher/gradlew
 test -f .gradle-deps/morphe-patcher/gradle/wrapper/gradle-wrapper.jar
 chmod +x .gradle-deps/morphe-patcher/gradlew
-(cd .gradle-deps/morphe-patcher && ./gradlew publishToMavenLocal --no-daemon --stacktrace)
+(cd .gradle-deps/morphe-patcher && ./gradlew publishToMavenLocal --no-daemon --stacktrace --exclude-task signMorphe-patcher-publicationPublication)
 
 cp .gradle-deps/morphe-patcher/gradle/wrapper/gradle-wrapper.jar gradle/wrapper/gradle-wrapper.jar
 chmod +x gradlew
