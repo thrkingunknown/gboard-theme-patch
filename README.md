@@ -30,6 +30,19 @@ Duplicate names are collapsed case-insensitively. Blank/trailing entries are ign
 A name-only or partial entry uses the default palette for omitted colors. Invalid-color
 entries are ignored instead of aborting the entire patch.
 
+## Morphe source metadata
+
+The canonical repository source is:
+`https://github.com/thrkingunknown/gboard-theme-patch`
+
+Morphe Manager resolves that repository to this metadata file on `main`:
+`https://raw.githubusercontent.com/thrkingunknown/gboard-theme-patch/main/patches-bundle.json`
+
+For a direct JSON source, use the raw metadata URL above. If an older Manager source entry
+shows **Metadata N/A**, remove that old entry and re-add the repository or the direct `.json`
+URL so Manager refreshes its remote metadata record. The installed bundle remains usable even
+while metadata is unavailable.
+
 ## Compatibility
 
 - Package: `com.google.android.inputmethod.latin`

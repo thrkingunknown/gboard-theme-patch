@@ -104,6 +104,14 @@ jobs:
             exit 1
           fi
 
+      - name: Verify published Morphe metadata
+        if: steps.release.outputs.new_release_published == 'true' && github.ref_name == 'main'
+        env:
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          METADATA_BRANCH: main
+          EXPECTED_VERSION: ${{ steps.release.outputs.new_release_version }}
+        run: python3 .github/scripts/verify_published_metadata.py
+
       - name: Attest
         if: steps.release.outputs.new_release_published == 'true'
         uses: actions/attest-build-provenance@v4

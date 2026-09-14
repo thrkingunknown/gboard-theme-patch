@@ -21,4 +21,6 @@ props=(ROOT/"gradle.properties").read_text()
 version=next(line.split("=",1)[1].strip() for line in props.splitlines() if line.startswith("version="))
 assert m["version"]==version
 assert m["package"]=="com.google.android.inputmethod.latin" and m["supportedVersion"]=="Any"
+assert m["metadata"]["rawUrl"] == "https://raw.githubusercontent.com/thrkingunknown/gboard-theme-patch/main/patches-bundle.json"
+assert m["metadata"]["managerSourceUrl"] == "https://github.com/thrkingunknown/gboard-theme-patch"
 print("PASS: source invariants")
