@@ -1,5 +1,7 @@
 group = "dev.thrkingunknown.gboard"
-version = "1.0.3"
+
+// The release version is supplied by the root Gradle version during semantic-release.
+// Do not override it here, or the generated .mpp filename will remain on an older version.
 
 patches {
     about {

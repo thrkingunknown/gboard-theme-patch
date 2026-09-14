@@ -21,7 +21,7 @@ for x in ['DEFAULT_THEME_NAME','DEFAULT_BACKGROUND','DEFAULT_PRIMARY','DEFAULT_S
 assert 'default = "(none)"' in s
 m=json.loads((ROOT/"verification-manifest.json").read_text())
 props=(ROOT/"gradle.properties").read_text()
-version=next(line.split("=",1)[1].strip() for line in props.splitlines() if line.startswith("version="))
+version=next(line.split("=",1)[1].strip() for line in props.splitlines() if line.replace(" ", "").startswith("version="))
 assert m["version"]==version
 assert m["package"]=="com.google.android.inputmethod.latin" and m["supportedVersion"]=="Any"
 print("PASS: source invariants")

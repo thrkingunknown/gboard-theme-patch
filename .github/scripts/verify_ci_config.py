@@ -16,8 +16,8 @@ checks = [
     ("npm ci --no-audit --no-fund", release),
     ("gradle/actions/setup-gradle@v6", release),
     ("cache-read-only: false", release),
-    ("org.gradle.caching=true", props),
-    ("org.gradle.parallel=true", props),
+    ("org.gradle.caching=true", props.replace(" ", "")),
+    ("org.gradle.parallel=true", props.replace(" ", "")),
     ("gradle-semantic-release-plugin", json.dumps(package_json)),
     ("downloadUrlTemplate", releaserc),
     ("prepareCmd", releaserc),
@@ -40,7 +40,7 @@ for metadata in ("patches-bundle.json", "patches-list.json"):
 json.loads(Path("patches-bundle.json").read_text(encoding="utf-8"))
 json.loads(Path("patches-list.json").read_text(encoding="utf-8"))
 bundle = json.loads(Path("patches-bundle.json").read_text(encoding="utf-8"))
-version_match = re.search(r"(?m)^version=(.+)$", props)
+version_match = re.search(r"(?m)^version\s*=\s*(.+)$", props)
 assert version_match, "gradle.properties must define version"
 project_version = version_match.group(1).strip()
 assert bundle["version"] == project_version
