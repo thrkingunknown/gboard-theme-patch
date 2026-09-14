@@ -47,9 +47,17 @@ jobs:
           cache-read-only: false
 
       - name: Ensure Gradle wrapper is present
+        env:
+          GPR_USER: ${{ secrets.GPR_USER }}
+          GPR_KEY: ${{ secrets.GPR_KEY }}
         run: |
+          set -euo pipefail
+          if [ -z "${GPR_USER:-}" ] || [ -z "${GPR_KEY:-}" ]; then
+            echo 'GPR_USER and GPR_KEY repository secrets are required to resolve Morphe packages.' >&2
+            exit 1
+          fi
           if [ ! -f gradle/wrapper/gradle-wrapper.jar ]; then
-            gradle wrapper --gradle-version 9.7.1 -Pgpr.user="${GITHUB_ACTOR}" -Pgpr.key="${GITHUB_TOKEN}"
+            gradle wrapper --gradle-version 9.7.1 -Pgpr.user="${GPR_USER}" -Pgpr.key="${GPR_KEY}"
           fi
           test -f gradle/wrapper/gradle-wrapper.jar
           chmod +x gradlew
@@ -73,6 +81,8 @@ jobs:
         id: release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GPR_USER: ${{ secrets.GPR_USER }}
+          GPR_KEY: ${{ secrets.GPR_KEY }}
 
       # Verify the exact public metadata and release asset that Morphe Manager will consume.
       # This catches broken/partial releases before the workflow is considered successful.
@@ -109,5 +119,6 @@ jobs:
       - name: Verify project compiles
         if: steps.release.outputs.new_release_published != 'true'
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./gradlew :patches:buildAndroid clean --no-daemon --build-cache -Pgpr.user="${GITHUB_ACTOR}" -Pgpr.key="${GITHUB_TOKEN}"
+          GPR_USER: ${{ secrets.GPR_USER }}
+          GPR_KEY: ${{ secrets.GPR_KEY }}
+        run: ./gradlew :patches:buildAndroid clean --no-daemon --build-cache -Pgpr.user="${GPR_USER}" -Pgpr.key="${GPR_KEY}"
