@@ -1,5 +1,6 @@
 from pathlib import Path
 import json
+import re
 
 release = Path(".github/workflows/release.yml").read_text()
 props = Path("gradle.properties").read_text()
@@ -24,7 +25,9 @@ checks = [
     ("Ensure Morphe dev branch exists", release),
     ("Verify published Morphe metadata", release),
     ("git push origin HEAD:refs/heads/dev", release),
-        ]
+    ("Bootstrap pinned Morphe build dependencies into mavenLocal", release),
+    ("publishToMavenLocal", release),
+]
 for needle, haystack in checks:
     assert needle in haystack, needle
 assert "npm ci" not in release
@@ -36,28 +39,16 @@ for metadata in ("patches-bundle.json", "patches-list.json"):
 json.loads(Path("patches-bundle.json").read_text())
 json.loads(Path("patches-list.json").read_text())
 bundle = json.loads(Path("patches-bundle.json").read_text())
-version_match = __import__("re").search(r"(?m)^version=(.+)$", props)
+version_match = re.search(r"(?m)^version=(.+)$", props)
 assert version_match, "gradle.properties must define version"
 project_version = version_match.group(1).strip()
-assert bundle["version"] == project_version, (
-    f"patches-bundle.json version {bundle['version']} != project version {project_version}"
-)
-assert bundle["download_url"].endswith(
-    f"/v{project_version}/patches-{project_version}.mpp"
-), "patches-bundle.json download_url does not match project version"
+assert bundle["version"] == project_version
+assert bundle["download_url"].endswith(f"/v{project_version}/patches-{project_version}.mpp")
 assert json.loads(Path("patches-list.json").read_text())["version"] == project_version
-print("CI/release/cache/generator configuration verification passed")
 
-workflow_text = Path(".github/workflows/release.yml").read_text()
-assert "Bootstrap pinned Morphe build dependencies" in workflow_text
-assert "MorpheApp/morphe-patches-gradle-plugin" in workflow_text
-assert "MorpheApp/morphe-patcher" in workflow_text
-assert "clone_tag()" in workflow_text
-assert "v1.3.3" in workflow_text
-assert "v1.7.0" in workflow_text
-assert "GIT_TERMINAL_PROMPT: '0'" in workflow_text
 settings_text = Path("settings.gradle.kts").read_text()
-assert 'pluginManagement {' in settings_text
-assert 'val localMorphePlugin = file(".gradle-deps/morphe-patches-gradle-plugin")' in settings_text
-assert 'includeBuild(localMorphePlugin)' in settings_text
-print("Morphe CI dependency bootstrap configuration passed")
+assert 'id("app.morphe.patches") version "1.3.3"' in settings_text
+assert "mavenLocal()" in settings_text
+assert "maven.pkg.github.com/MorpheApp/registry" not in settings_text
+print("CI/release/cache/generator configuration passed")
+print("Morphe CI bootstrap configuration passed")
