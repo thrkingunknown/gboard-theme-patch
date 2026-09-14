@@ -12,7 +12,6 @@ required = [
     ".releaserc",
     ".github/workflows/release.yml",
     ".github/scripts/generate_patches_readme.py",
-    ".github/scripts/bootstrap_morphe.sh",
     "package.json",
     "README.md",
     "patches-bundle.json",
@@ -29,10 +28,9 @@ releaserc = Path(".releaserc").read_text()
 readme = Path("README.md").read_text()
 
 assert 'id("app.morphe.patches") version "1.3.4"' in settings
-assert 'val localMorphePlugin = rootDir.resolve(".gradle-deps/morphe-patches-gradle-plugin")' in settings
-assert 'includeBuild(localMorphePlugin)' in settings
+assert 'name = "GitHubPackages"' in settings
+assert "maven.pkg.github.com/MorpheApp/registry" in settings
 assert "mavenLocal()" in settings
-assert "maven.pkg.github.com/MorpheApp/registry" not in settings
 assert 'morphe-patcher = "1.13.0"' in catalog
 assert 'morphe-patcher = { module = "app.morphe:morphe-patcher", version.ref = "morphe-patcher" }' in catalog
 assert 'name = "Gboard AMOLED Theme Studio"' in build
@@ -41,14 +39,11 @@ assert 'cycjimmy/semantic-release-action@v6' in release
 assert 'actions/setup-java@v6.0.0' in release
 assert 'actions/setup-node@v7' in release
 assert "gradle-version: '9.7.1'" in release
-assert 'gradle wrapper --gradle-version 9.7.1' not in release
-assert 'Bootstrap pinned Morphe toolchain' in release
+assert 'gradle wrapper --gradle-version 9.7.1' in release
+assert 'Ensure Gradle wrapper is available' in release
+assert 'Verify Morphe Gradle plugin resolution' in release
 assert 'publishToMavenLocal' not in release
-assert 'includeBuild(localMorphePatcher)' in settings
-bootstrap = Path('.github/scripts/bootstrap_morphe.sh').read_text()
-assert 'MorpheApp/morphe-patches-gradle-plugin' in bootstrap
-assert 'MorpheApp/morphe-patcher' in bootstrap
-assert '1.3.4' in bootstrap and '1.13.0' in bootstrap
+assert 'bootstrap_morphe.sh' not in release
 assert 'gradle-semantic-release-plugin' in releaserc
 assert 'patches-bundle.json' in releaserc
 assert 'patches-list.json' in releaserc

@@ -1,15 +1,18 @@
 rootProject.name = "gboard-amoled-themes"
 
 pluginManagement {
-    val localMorphePlugin = rootDir.resolve(".gradle-deps/morphe-patches-gradle-plugin")
-    if (localMorphePlugin.isDirectory) {
-        includeBuild(localMorphePlugin)
-    }
-
     repositories {
         mavenLocal()
         gradlePluginPortal()
         google()
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/MorpheApp/registry")
+            credentials {
+                username = providers.gradleProperty("gpr.user").getOrElse(System.getenv("GITHUB_ACTOR"))
+                password = providers.gradleProperty("gpr.key").getOrElse(System.getenv("GITHUB_TOKEN"))
+            }
+        }
         maven { url = uri("https://jitpack.io") }
     }
 }
@@ -18,13 +21,5 @@ plugins {
     id("app.morphe.patches") version "1.3.4"
 }
 
-// Use the pinned local Patcher source exactly as the official Morphe template does.
-// This avoids Maven/GPG publication entirely during CI bootstrap.
-val localMorphePatcher = rootDir.resolve(".gradle-deps/morphe-patcher")
-if (localMorphePatcher.isDirectory) {
-    includeBuild(localMorphePatcher) {
-        dependencySubstitution {
-            substitute(module("app.morphe:morphe-patcher")).using(project(":"))
-        }
-    }
-}
+// The Morphe Patches plugin is published to GitHub Packages.
+// CI provides gpr.user/gpr.key and GITHUB_ACTOR/GITHUB_TOKEN.

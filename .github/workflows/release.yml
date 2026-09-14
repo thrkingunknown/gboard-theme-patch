@@ -43,7 +43,7 @@ jobs:
           cache-dependency-path: package-lock.json
 
       - name: Install dependencies
-        run: npm install --no-audit --no-fund
+        run: npm ci --no-audit --no-fund
 
       - name: Suppress Git default-branch advice
         run: git config --global advice.defaultBranchName false
@@ -59,23 +59,27 @@ jobs:
           set -euo pipefail
           umask 077
           mkdir -p "${GRADLE_USER_HOME}"
-          printf '%s\n' \
-            "gpr.user=${GITHUB_ACTOR}" \
-            "gpr.key=${GITHUB_TOKEN}" \
-            > "${GRADLE_USER_HOME}/gradle.properties.ci-morphe"
-          if [ -f "${GRADLE_USER_HOME}/gradle.properties" ]; then
-            cp "${GRADLE_USER_HOME}/gradle.properties" "${RUNNER_TEMP}/gradle.properties.pre-morphe"
-          fi
-          cat "${GRADLE_USER_HOME}/gradle.properties.ci-morphe" >> "${GRADLE_USER_HOME}/gradle.properties"
+          touch "${GRADLE_USER_HOME}/gradle.properties"
+          {
+            echo "gpr.user=${GITHUB_ACTOR}"
+            echo "gpr.key=${GITHUB_TOKEN}"
+          } >> "${GRADLE_USER_HOME}/gradle.properties"
           echo "Morphe Gradle credentials configured in Gradle user properties."
 
-      - name: Bootstrap pinned Morphe toolchain
-        env:
-          GIT_TERMINAL_PROMPT: '0'
+      - name: Ensure Gradle wrapper is available
         run: |
           set -euo pipefail
-          chmod +x .github/scripts/bootstrap_morphe.sh gradlew
-          bash .github/scripts/bootstrap_morphe.sh
+          if [ ! -f gradle/wrapper/gradle-wrapper.jar ]; then
+            gradle wrapper --gradle-version 9.7.1
+          fi
+          test -f gradle/wrapper/gradle-wrapper.jar
+          chmod +x gradlew
+          ./gradlew --version
+
+      - name: Verify Morphe Gradle plugin resolution
+        run: |
+          set -euo pipefail
+          ./gradlew help --no-daemon --stacktrace
 
       - name: Ensure Morphe dev branch exists
         run: |
@@ -140,4 +144,4 @@ jobs:
 
       - name: Verify project compiles
         if: steps.release.outputs.new_release_published != 'true'
-        run: ./gradlew :patches:buildAndroid clean --no-daemon --build-cache
+        run: ./gradlew clean :patches:buildAndroid --no-daemon --build-cache

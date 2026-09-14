@@ -13,7 +13,7 @@ checks = [
     ("actions/setup-node@v7", release),
     ("cache: 'npm'", release),
     ("cache-dependency-path: package-lock.json", release),
-    ("npm install --no-audit --no-fund", release),
+    ("npm ci --no-audit --no-fund", release),
     ("gradle/actions/setup-gradle@v6", release),
     ("cache-read-only: false", release),
     ("org.gradle.caching=true", props),
@@ -25,12 +25,13 @@ checks = [
     ("Ensure Morphe dev branch exists", release),
     ("Verify published Morphe metadata", release),
     ("git push origin HEAD:refs/heads/dev", release),
-    ("Bootstrap pinned Morphe toolchain", release),
-    ("Bootstrap pinned Morphe toolchain", release),
+    ("Ensure Gradle wrapper is available", release),
+    ("Verify Morphe Gradle plugin resolution", release),
+    ("maven.pkg.github.com/MorpheApp/registry", Path("settings.gradle.kts").read_text()),
 ]
 for needle, haystack in checks:
     assert needle in haystack, needle
-assert "npm ci" not in release
+assert "npm install" not in release
 assert "github.ref_name == 'main' || github.ref_name == 'dev'" in release
 assert "actions/cache@" not in release
 assert Path("patches/src/main/kotlin/util/PatchListGenerator.kt").exists()
@@ -48,17 +49,13 @@ assert json.loads(Path("patches-list.json").read_text())["version"] == project_v
 
 settings_text = Path("settings.gradle.kts").read_text()
 assert 'id("app.morphe.patches") version "1.3.4"' in settings_text
-assert 'includeBuild(localMorphePlugin)' in settings_text
-assert 'val localMorphePatcher = rootDir.resolve(".gradle-deps/morphe-patcher")' in settings_text
-assert 'substitute(module("app.morphe:morphe-patcher")).using(project(":"))' in settings_text
-assert "mavenLocal()" in settings_text
-assert "maven.pkg.github.com/MorpheApp/registry" not in settings_text
-assert "maven.pkg.github.com/MorpheApp/registry" not in release
-assert "substitute(module(\"app.morphe:morphe-patcher\")).using(project(\":\"))" in settings_text
+assert 'name = "GitHubPackages"' in settings_text
+assert 'https://maven.pkg.github.com/MorpheApp/registry' in settings_text
+assert 'providers.gradleProperty("gpr.user").getOrElse(System.getenv("GITHUB_ACTOR"))' in settings_text
+assert 'providers.gradleProperty("gpr.key").getOrElse(System.getenv("GITHUB_TOKEN"))' in settings_text
 assert "publishToMavenLocal" not in release
-assert "publishToMavenLocal" not in Path(".github/scripts/bootstrap_morphe.sh").read_text()
-bootstrap = release.index("Bootstrap pinned Morphe toolchain")
+assert "bootstrap_morphe.sh" not in release
+wrapper_step = release.index("Ensure Gradle wrapper is available")
 release_action = release.index("uses: cycjimmy/semantic-release-action@v6")
-assert bootstrap < release_action
-print("CI/release/cache/generator configuration passed")
-print("Morphe CI bootstrap configuration passed")
+assert wrapper_step < release_action
+print("CI/release/cache/generator/Morphe registry configuration passed")
