@@ -1,17 +1,19 @@
 {
-  "project_version": "1.0.0",
-  "patch_name": "Midnight Red AMOLED Theme",
-  "source_name": "Gboard AMOLED Themes",
-  "compatibility": {
-    "package": "com.google.android.inputmethod.latin",
-    "versions": "Any",
-    "tested_against": "18.0.3.954559732"
-  },
-  "defaults": {
+  "name": "Gboard AMOLED Theme Studio",
+  "version": "1.0.0",
+  "package": "com.google.android.inputmethod.latin",
+  "supportedVersion": "Any",
+  "defaultTheme": {
+    "name": "Midnight Red",
     "background": "#000000",
     "primary": "#FF0000",
     "secondary": "#2A0A0A",
     "tertiary": "#1F0B0B"
   },
-  "dynamic_metadata_sha256": "a125ef3e5db3a8b36ee9d4558b13aaeb7e028c105bd1cb94e6619ca0f4b139aa"
+  "additionalThemes": {
+    "enabled": true,
+    "format": "Name|Background|Primary|Secondary|Tertiary",
+    "separator": ";;",
+    "emptyValue": "(none)"
+  }
 }

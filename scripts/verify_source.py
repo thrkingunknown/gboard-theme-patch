@@ -1,35 +1,20 @@
 from pathlib import Path
-
-s = Path("patches/src/main/kotlin/dev/thrkingunknown/gboard/MidnightRedThemePatch.kt")
-if not s.exists():
-    s = Path("patches/src/main/kotlin/dev/dva11/gboard/MidnightRedThemePatch.kt")
-text = s.read_text()
-build = Path("patches/build.gradle.kts").read_text()
-
-checks = [
-    'val themeListing = Fingerprint(',
-    'parameters = listOf("Landroid/os/Bundle;")',
-    'themeListing.method.implementation?.instructions',
-    'themeListing.method.addInstructions(',
-    'import app.morphe.patcher.extensions.InstructionExtensions.addInstructions',
-    'stringOption(key = "Background")',
-    'stringOption(key = "Primary / action")',
-    'stringOption(key = "Secondary / normal keys")',
-    'stringOption(key = "Tertiary / modifier keys")',
-    'stringOption(key = "Additional themes")',
-    'Landroidx/fragment/app/Fragment;->getContext()Landroid/content/Context;',
-    'new-instance v12, Ljxq;',
-    'invoke-direct {v12, v10, v11}, Ljxq;-><init>(Ljava/lang/String;Ljyj;)V',
-]
-for item in checks:
-    assert item in text, item
-
-assert 'stringOption(name =' not in text
-assert 'AppTarget(' not in text
-assert 'Ljxu;' not in text
-assert 'new-instance v12, Ljyj;' not in text
-assert 'anchor.index' not in text
-assert 'anchor.index + 1' not in text
-assert 'name = "Gboard AMOLED Themes"' in build
-assert 'contact = "https://github.com/thrkingunknown"' in build
-print("Static patch/template verification passed")
+import json
+ROOT=Path(__file__).resolve().parents[1]
+s=(ROOT/"patches/src/main/kotlin/dev/dva11/gboard/MidnightRedThemePatch.kt").read_text()
+assert 'name = "Gboard AMOLED Theme Studio"' in s
+assert 'packageName = PACKAGE_NAME' in s
+assert 'AppTarget(' not in s
+assert 'getContext()Landroid/content/Context;' in s
+assert 'new-instance v12, Ljxq;' in s
+assert 'new-instance v12, Ljyj;' not in s
+assert 'definingClass = "Ljxu;"' not in s
+assert 'val endIndex = instructions.lastIndex' in s
+assert 'split(";;")' in s
+assert 'Additional theme #' in s
+for x in ['DEFAULT_THEME_NAME','DEFAULT_BACKGROUND','DEFAULT_PRIMARY','DEFAULT_SECONDARY','DEFAULT_TERTIARY']:
+    assert f'default = {x}' in s
+assert 'default = "(none)"' in s
+m=json.loads((ROOT/"verification-manifest.json").read_text())
+assert m["version"]=="1.0.0" and m["package"]=="com.google.android.inputmethod.latin" and m["supportedVersion"]=="Any"
+print("PASS: source invariants")

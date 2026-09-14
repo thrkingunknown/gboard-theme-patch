@@ -1,60 +1,52 @@
-# 👋 Gboard AMOLED Themes — Morphe Patches
+# Gboard AMOLED Theme Studio
 
-Configurable AMOLED theme patches for Gboard.
+Standalone Morphe patch for **Gboard only** (`com.google.android.inputmethod.latin`).
 
-## Morphe Manager
+## Default values
 
-Add the GitHub repository as a Morphe patch source:
+| Option | Default |
+|---|---|
+| Theme name | `Midnight Red` |
+| Background | `#000000` |
+| Primary / action | `#FF0000` |
+| Secondary / normal keys | `#2A0A0A` |
+| Tertiary / modifier keys | `#1F0B0B` |
+| Additional themes | `(none)` |
 
-https://morphe.software/add-source?github=thrkingunknown/gboard-theme-patch
+Colours accept `#RRGGBB` or `#AARRGGBB`.
 
-Morphe Manager consumes `patches-bundle.json` from the repository default branch
-and the `.mpp` published by the standard Morphe patch release workflow.
+## Additional themes
 
-## Development
+The **Additional themes** option is functional.
 
-Use the `dev` branch for development. The repository follows the current
-Morphe Patches template release model: semantic commit messages drive releases,
-`dev` generates pre-releases, and merging `dev` into `main` produces a stable
-release.
+Format:
+`Name|Background|Primary|Secondary|Tertiary`
 
-Build locally with:
+Separate multiple themes with `;;`:
+`Ocean|#000000|#00B7FF|#08202A|#123C4A;;Purple|#000000|#B56CFF|#24113A|#40205C`
 
-```bash
-./gradlew buildAndroid
-```
+The default Midnight Red theme is always generated from the five primary options.
+Duplicate names are collapsed case-insensitively. Malformed entries fail explicitly.
 
-The generated patch bundle is under:
+## Compatibility
 
-```text
-patches/build/libs/patches-*.mpp
-```
+- Package: `com.google.android.inputmethod.latin`
+- App: Gboard
+- Supported version: **Any**
+- No `AppTarget` version restrictions.
 
-## Theme
+Morphe documents that specifying a package without version targets means the patch
+is compatible with any version of that package.
 
-Default theme: **Midnight Red AMOLED**
+## Runtime safety
 
-- Background: `#000000`
-- Primary/action: `#FF0000`
-- Secondary: `#2A0A0A`
-- Tertiary: `#1F0B0B`
+Theme registration is inserted after Gboard finishes constructing its built-in
+theme list. It does not hook the constructor inside that loop.
 
-The patch also exposes configurable colour options and supports additional
-theme definitions.
+The registration obtains a real Android `Context` from the Fragment and constructs
+`Ljxq` with an `Ljxq` receiver, addressing the ART verifier failure from the
+previous build.
 
-## Release model
+## Version
 
-This repository intentionally uses the official Morphe template semantic-release
-workflow rather than a custom release builder. Semantic-release generates
-`patches-list.json` and `patches-bundle.json`, publishes the `.mpp`, and the
-release workflow ensures the release metadata remains reachable from the active
-release branch so Morphe Manager can read it. The root metadata files included
-here are a bootstrap copy of the current `v1.1.0` release and will be replaced
-by semantic-release on the next release.
-
-Do not manually edit generated release files during normal development.
-
-## 🩹 Patches
-
-<!-- PATCHES_START -->
-<!-- PATCHES_END -->
+Project/release version: **1.0.0**.

@@ -1,9 +1,10 @@
 group = "dev.thrkingunknown.gboard"
+version = "1.0.0"
 
 patches {
     about {
-        name = "Gboard AMOLED Themes"
-        description = "Configurable AMOLED themes for Gboard, with Midnight Red defaults."
+        name = "Gboard AMOLED Theme Studio"
+        description = "Standalone, configurable AMOLED themes for Gboard. Midnight Red is the default palette."
         source = "https://github.com/thrkingunknown/gboard-theme-patch"
         author = "thrkingunknown"
         contact = "https://github.com/thrkingunknown"

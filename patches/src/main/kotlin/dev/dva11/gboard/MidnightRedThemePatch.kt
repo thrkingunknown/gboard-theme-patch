@@ -12,7 +12,6 @@ private const val DEFAULT_BACKGROUND = "#000000"
 private const val DEFAULT_PRIMARY = "#FF0000"
 private const val DEFAULT_SECONDARY = "#2A0A0A"
 private const val DEFAULT_TERTIARY = "#1F0B0B"
-private const val MATERIAL_YOU = "Material You"
 
 private val compatibility = Compatibility(
     name = "Gboard",
@@ -22,12 +21,30 @@ private val compatibility = Compatibility(
     // No targets: Morphe reports this patch as compatible with Any Gboard version.
 )
 
-private val themeNameOption = stringOption(key = "Theme name")
-private val backgroundOption = stringOption(key = "Background")
-private val primaryOption = stringOption(key = "Primary / action")
-private val secondaryOption = stringOption(key = "Secondary / normal keys")
-private val tertiaryOption = stringOption(key = "Tertiary / modifier keys")
-private val additionalThemesOption = stringOption(key = "Additional themes")
+private val themeNameOption = stringOption(
+    key = "Theme name",
+    default = DEFAULT_THEME_NAME,
+)
+private val backgroundOption = stringOption(
+    key = "Background",
+    default = DEFAULT_BACKGROUND,
+)
+private val primaryOption = stringOption(
+    key = "Primary / action",
+    default = DEFAULT_PRIMARY,
+)
+private val secondaryOption = stringOption(
+    key = "Secondary / normal keys",
+    default = DEFAULT_SECONDARY,
+)
+private val tertiaryOption = stringOption(
+    key = "Tertiary / modifier keys",
+    default = DEFAULT_TERTIARY,
+)
+private val additionalThemesOption = stringOption(
+    key = "Additional themes",
+    default = "(none)",
+)
 
 private data class ThemeSpec(
     val name: String,
@@ -51,16 +68,18 @@ private fun normalizeSpec(
     tertiary = tertiary.trim().ifBlank { DEFAULT_TERTIARY },
 )
 
-private fun parseAdditionalThemes(value: String): List<ThemeSpec> =
-    value.lineSequence()
-        .map { it.trim() }
-        .filter { it.isNotEmpty() }
-        .mapNotNull { line ->
-            val fields = line.split('|', limit = 5)
-            if (fields.size != 5) return@mapNotNull null
-            normalizeSpec(fields[0], fields[1], fields[2], fields[3], fields[4])
+private fun parseAdditionalThemes(value: String): List<ThemeSpec> {
+    val input = value.trim()
+    if (input.isEmpty() || input.equals("(none)", ignoreCase = true)) return emptyList()
+
+    return input.split(";;").mapIndexed { index, entry ->
+        val fields = entry.trim().split('|', limit = 5)
+        require(fields.size == 5) {
+            "Additional theme #${index + 1} must use: Name|Background|Primary|Secondary|Tertiary"
         }
-        .toList()
+        normalizeSpec(fields[0], fields[1], fields[2], fields[3], fields[4])
+    }
+}
 
 private fun slugify(name: String, index: Int): String {
     val base = name
@@ -74,17 +93,9 @@ private fun slugify(name: String, index: Int): String {
 
 private fun parseColor(spec: String): Int? {
     val s = spec.trim()
-    if (
-        s.equals(MATERIAL_YOU, ignoreCase = true) ||
-        s.equals("dynamic", ignoreCase = true) ||
-        s.equals("material_you", ignoreCase = true)
-    ) {
-        return null
-    }
-
     val hex = s.removePrefix("#")
     require(hex.length == 6 || hex.length == 8) {
-        "Invalid color '$spec'. Use #RRGGBB, #AARRGGBB, or '$MATERIAL_YOU'."
+        "Invalid color '$spec'. Use #RRGGBB or #AARRGGBB."
     }
     val value = hex.toLongOrNull(16)
         ?: error("Invalid hexadecimal color '$spec'.")
@@ -276,8 +287,8 @@ private fun injection(specs: List<ThemeSpec>): String {
 }
 
 private val midnightRedResources = rawResourcePatch(
-    name = "Midnight Red AMOLED Theme Resources",
-    description = "Generates independent Gboard AMOLED theme assets from Morphe options.",
+    name = "Gboard AMOLED Theme Resources",
+    description = "Generates independent Gboard AMOLED theme assets from the configured theme options.",
     default = false,
 ) {
     compatibleWith(compatibility)
@@ -314,8 +325,8 @@ private val midnightRedResources = rawResourcePatch(
 }
 
 val midnightRedTheme = bytecodePatch(
-    name = "Midnight Red AMOLED Theme",
-    description = "Configurable AMOLED Gboard themes with Midnight Red defaults and optional Material You colors.",
+    name = "Gboard AMOLED Theme Studio",
+    description = "Adds configurable standalone AMOLED Gboard themes. Midnight Red is the default palette; additional themes can be defined in one patch.",
     default = false,
 ) {
     compatibleWith(compatibility)

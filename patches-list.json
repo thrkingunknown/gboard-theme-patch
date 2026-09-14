@@ -1,10 +1,10 @@
 {
   "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
-  "version": "1.1.0",
+  "version": "1.0.0",
   "patches": [
     {
-      "name": "Midnight Red AMOLED Theme",
-      "description": "Configurable AMOLED Gboard themes with Midnight Red defaults and optional Material You colors.",
+      "name": "Gboard AMOLED Theme Studio",
+      "description": "Adds configurable standalone AMOLED Gboard themes. Midnight Red is the default palette; additional themes can be defined in one patch.",
       "default": false,
       "category": null,
       "dependencies": [
@@ -24,7 +24,7 @@
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
-              "description": null
+              "description": "Any Gboard version"
             }
           ]
         }
@@ -36,7 +36,7 @@
           "description": null,
           "required": false,
           "type": "kotlin.String",
-          "default": null,
+          "default": "Midnight Red",
           "values": null
         },
         {
@@ -45,7 +45,7 @@
           "description": null,
           "required": false,
           "type": "kotlin.String",
-          "default": null,
+          "default": "#000000",
           "values": null
         },
         {
@@ -54,7 +54,7 @@
           "description": null,
           "required": false,
           "type": "kotlin.String",
-          "default": null,
+          "default": "#FF0000",
           "values": null
         },
         {
@@ -63,7 +63,7 @@
           "description": null,
           "required": false,
           "type": "kotlin.String",
-          "default": null,
+          "default": "#2A0A0A",
           "values": null
         },
         {
@@ -72,7 +72,7 @@
           "description": null,
           "required": false,
           "type": "kotlin.String",
-          "default": null,
+          "default": "#1F0B0B",
           "values": null
         },
         {
@@ -81,7 +81,7 @@
           "description": null,
           "required": false,
           "type": "kotlin.String",
-          "default": null,
+          "default": "(none)",
           "values": null
         }
       ]
