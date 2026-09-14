@@ -1,19 +1,19 @@
-group = "dev.dva11.gboard"
+group = "dev.thrkingunknown.gboard"
 
 patches {
     about {
         name = "Gboard AMOLED Themes"
-        description = "Configurable AMOLED themes for Gboard, including Midnight Red."
+        description = "Configurable AMOLED themes for Gboard, with Midnight Red defaults."
         source = "https://github.com/thrkingunknown/gboard-theme-patch"
-        author = "Dva.11"
+        author = "thrkingunknown"
         contact = "https://github.com/thrkingunknown"
         website = "https://github.com/thrkingunknown/gboard-theme-patch"
         license = "GPLv3"
     }
 }
 
-// Separate configuration so Gson is available to the patch-list generator
-// but is never bundled into the generated Android patch.
+// Match the Morphe template: Gson is available to the generated patch-list task
+// but is not bundled into the patch APK.
 val patchListGeneratorClasspath = configurations.create("patchListGeneratorClasspath")
 
 dependencies {
@@ -23,7 +23,7 @@ dependencies {
 
 tasks {
     register<JavaExec>("generatePatchesList") {
-        description = "Build patch with patch list"
+        description = "Generate the Morphe patch list."
         dependsOn(build)
         classpath = sourceSets["main"].runtimeClasspath + patchListGeneratorClasspath
         mainClass.set("util.PatchListGeneratorKt")

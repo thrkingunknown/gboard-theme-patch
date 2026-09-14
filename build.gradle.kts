@@ -1,1 +1,1 @@
-version = providers.gradleProperty("version").orElse("1.0.0").get()
+// Root build configuration for Gboard AMOLED Themes

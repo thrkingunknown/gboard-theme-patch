@@ -1,81 +1,57 @@
-# Gboard AMOLED Themes
+# 👋 Gboard AMOLED Themes — Morphe Patches
 
-Morphe patch source for configurable Gboard AMOLED themes.
+Configurable AMOLED theme patches for Gboard.
 
-## Patch
+## Morphe Manager
 
-**Midnight Red AMOLED Theme**
+Add the GitHub repository as a Morphe patch source:
 
-Default palette:
+https://morphe.software/add-source?github=thrkingunknown/gboard-theme-patch
+
+Morphe Manager consumes the generated release metadata and `.mpp` produced by
+the standard Morphe patch release workflow.
+
+## Development
+
+Use the `dev` branch for development. The repository follows the current
+Morphe Patches template release model: semantic commit messages drive releases,
+`dev` generates pre-releases, and merging `dev` into `main` produces a stable
+release.
+
+Build locally with:
+
+```bash
+./gradlew buildAndroid
+```
+
+The generated patch bundle is under:
+
+```text
+patches/build/libs/patches-*.mpp
+```
+
+## Theme
+
+Default theme: **Midnight Red AMOLED**
 
 - Background: `#000000`
-- Primary / action: `#FF0000`
-- Secondary / normal keys: `#2A0A0A`
-- Tertiary / modifier keys: `#1F0B0B`
+- Primary/action: `#FF0000`
+- Secondary: `#2A0A0A`
+- Tertiary: `#1F0B0B`
 
-The patch declares Gboard package compatibility without a version target, so Morphe
-reports the supported Gboard version as **Any**. The implementation was developed
-against the supplied Gboard `18.0.3.954559732` APKM.
+The patch also exposes configurable colour options and supports additional
+theme definitions.
 
-## Morphe customization
+## Release model
 
-The patch exposes options directly in Morphe:
+This repository intentionally uses the official Morphe template semantic-release
+workflow rather than a custom release builder. Morphe's template automatically
+generates `patches-list.json` and `patches-bundle.json`, publishes the `.mpp`,
+and keeps Morphe Manager's source metadata synchronized.
 
-- Theme name
-- Background colour
-- Primary/action colour
-- Secondary/normal-key colour
-- Tertiary/modifier-key colour
-- Additional themes
+Do not manually edit generated release files.
 
-Each colour accepts `#RRGGBB`, `#AARRGGBB`, or `Material You`.
+## 🩹 Patches
 
-`Material You` uses Gboard's native dynamic-colour dark theme as the base; the
-requested role is left to Gboard's dynamic palette while other roles can remain
-custom.
-
-### Multiple themes
-
-Enter one theme per line:
-
-```text
-Crimson|#000000|#FF1744|#22070B|#3A0C12
-Cyber Red|#000000|#FF0033|#180008|Material You
-```
-
-Format:
-
-```text
-Name|Background|Primary|Secondary|Tertiary
-```
-
-Duplicate names are collapsed.
-
-## Theme registration
-
-The patch inserts registrations immediately before the terminal instruction of
-`ThemeListingFragment.f(Bundle)`. It does not anchor to Gboard's existing theme
-constructor loop, which was the source of the previous duplicate-theme behavior.
-
-The injected code obtains a real `Context` through `Fragment.getContext()` and
-allocates the `Ljxq` receiver with the correct type before invoking its constructor.
-
-Theme metadata/assets are generated at patch time and use unique `mrd_*` filenames;
-the built-in Gboard themes are not overwritten.
-
-## Build / release
-
-Use:
-
-**Actions -> Build Morphe Patch -> Run workflow**
-
-The manual workflow provides:
-
-- **Publish to releases** — create a GitHub Release after a successful build.
-- **Version** — enter `1.0.0`, `1.0.0-beta.1`, etc.
-- **Release type** — `release` or `pre-release`.
-
-The `.mpp` and SHA-256 checksum are always uploaded as workflow artifacts.
-
-The workflow uses the current Morphe template action family: checkout 7, setup-java 6,
-setup-gradle 6, upload-artifact 7, JDK 21, and Gradle 8.14.4.
+<!-- PATCHES_START -->
+<!-- PATCHES_END -->
