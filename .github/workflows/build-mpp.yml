@@ -2,9 +2,15 @@ name: Build Morphe Patch
 
 on:
   workflow_dispatch:
+    inputs:
+      publish_release:
+        description: "Publish v1.0.0 to GitHub Releases"
+        required: true
+        default: false
+        type: boolean
 
 permissions:
-  contents: read
+  contents: write
   packages: read
 
 jobs:
@@ -12,60 +18,97 @@ jobs:
     name: Build and verify .mpp
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-java@v4
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "21"
           cache: gradle
 
-      - uses: gradle/actions/setup-gradle@v4
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: "8.14"
 
-      - name: Static bytecode-source verification
+      - name: Static source verification
         shell: bash
         run: |
+          set -euo pipefail
           python - <<'PY'
           from pathlib import Path
           p = Path("patches/src/main/kotlin/dev/dva11/gboard/MidnightRedThemePatch.kt")
-          s = p.read_text()
+          s = p.read_text(encoding="utf-8")
           required = [
+              'name = "Dva.11 Midnight Red Theme"',
+              'packageName = PACKAGE_NAME',
+              'AppTarget' not in s,
+              'getContext()Landroid/content/Context;',
               'new-instance v12, Ljxq;',
-              'invoke-static {p1, v11}, Ljyj;->e(Landroid/content/Context;Lqyk;)Ljyj;',
-              'invoke-direct {v12, v9, v11}, Ljxq;-><init>(Ljava/lang/String;Ljyj;)V',
+              'invoke-direct {v12, v9, v10}, Ljxq;-><init>(Ljava/lang/String;Ljyj;)V',
               'invoke-interface {v5, v12}, Ljava/util/List;->add(Ljava/lang/Object;)Z',
-              'definingClass = "Ljxu;"',
-              'anchor.index,',
+              'val insertionIndex = instructions.lastIndex',
           ]
-          for item in required:
-              assert item in s, item
+          assert all(required), required
           assert 'new-instance v12, Ljyj;' not in s
-          assert 'anchor.index + 1' not in s
-          print("Static injection verification passed")
+          assert 'invoke-static {p1, v11}' not in s
+          assert 'definingClass = "Ljxu;"' not in s
+          print("Static patch safety checks passed")
           PY
+
+      - name: Clean previous outputs
+        run: rm -rf patches/build
 
       - name: Build
         env:
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gradle buildAndroid --no-daemon --stacktrace
+        run: gradle :patches:buildAndroid --no-daemon --stacktrace
 
-      - name: Verify .mpp
+      - name: Verify generated bundle
         shell: bash
         run: |
+          set -euo pipefail
           shopt -s nullglob
           files=(patches/build/libs/*.mpp)
           test "${#files[@]}" -eq 1
-          unzip -t "${files[0]}"
-          sha256sum "${files[0]}" > patches/build/libs/SHA256SUMS.txt
+          file="${files[0]}"
+          unzip -t "$file"
+          python - "$file" <<'PY'
+          import sys, zipfile
+          from pathlib import Path
+          p = Path(sys.argv[1])
+          with zipfile.ZipFile(p) as z:
+              names = set(z.namelist())
+              assert any(n.endswith(".dex") for n in names), "MPP has no compiled DEX"
+              assert any(n.endswith(".json") for n in names), "MPP has no patch metadata"
+          print(f"Verified: {p.name}")
+          PY
+          sha256sum "$file" | tee patches/build/libs/SHA256SUMS.txt
 
-      - uses: actions/upload-artifact@v4
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
         with:
-          name: Gboard-Midnight-Red-Morphe-Patch-${{ github.run_number }}
+          name: Dva11-Gboard-Midnight-Red-v1.0.0
           path: |
             patches/build/libs/*.mpp
             patches/build/libs/SHA256SUMS.txt
           if-no-files-found: error
           retention-days: 30
+
+      - name: Publish v1.0.0 release
+        if: ${{ inputs.publish_release == true }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          files=(patches/build/libs/*.mpp)
+          test "${#files[@]}" -eq 1
+          gh release view v1.0.0 >/dev/null 2>&1 || gh release create v1.0.0 \
+            --title "Dva.11 Gboard Midnight Red v1.0.0" \
+            --notes "Standalone Gboard Midnight Red Morphe patch."
+          gh release upload v1.0.0 "${files[0]}" patches/build/libs/SHA256SUMS.txt --clobber
