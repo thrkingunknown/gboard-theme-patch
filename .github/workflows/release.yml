@@ -12,6 +12,15 @@ jobs:
       packages: write
       id-token: write
       attestations: write
+    env:
+      # Morphe's settings plugin needs GitHub Package credentials while it
+      # configures repositories. Provide them as Gradle project properties
+      # so every Gradle process, including semantic-release's child Gradle
+      # process, sees the same values.
+      GITHUB_ACTOR: ${{ github.actor }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      ORG_GRADLE_PROJECT_gpr_user: ${{ github.actor }}
+      ORG_GRADLE_PROJECT_gpr_key: ${{ secrets.GITHUB_TOKEN }}
     runs-on: ubuntu-latest
     # semantic-release is configured for main and dev only.
     if: github.ref_name == 'main' || github.ref_name == 'dev'
@@ -54,9 +63,6 @@ jobs:
           chmod +x .github/scripts/bootstrap_morphe.sh gradlew
           bash .github/scripts/bootstrap_morphe.sh
 
-      - name: Preflight Gradle configuration
-        run: ./gradlew --no-daemon --stacktrace help
-
       - name: Ensure Morphe dev branch exists
         env:
           GITHUB_ACTOR: ${{ github.actor }}
@@ -70,7 +76,19 @@ jobs:
           fi
 
       - name: Verify CI, release, and cache configuration
-        run: python3 .github/scripts/verify_ci_config.py
+        run: |
+          set -euo pipefail
+          python3 .github/scripts/verify_ci_config.py
+          python3 scripts/verify_morphe_credentials.py
+          python3 scripts/verify_build_config.py
+          python3 scripts/verify_dependency_alignment.py
+          python3 scripts/verify_morphe_composites.py
+          python3 scripts/verify_settings_bootstrap.py
+          python3 scripts/verify_source.py
+          python3 scripts/verify_toolchain.py
+
+      - name: Preflight Gradle configuration
+        run: ./gradlew --no-daemon --stacktrace help
 
       - name: Release
         uses: cycjimmy/semantic-release-action@v6
@@ -115,4 +133,4 @@ jobs:
         env:
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./gradlew clean :patches:buildAndroid --no-daemon --build-cache
+        run: ./gradlew :patches:buildAndroid clean --no-daemon --build-cache
