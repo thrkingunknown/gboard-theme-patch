@@ -108,6 +108,12 @@ jobs:
           set -euo pipefail
           python scripts/verify_source.py
 
+      - name: Build configuration verification
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/verify_build_config.py
+
       - name: Build .mpp
         env:
           GITHUB_ACTOR: ${{ github.actor }}
