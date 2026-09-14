@@ -6,7 +6,6 @@
       "name": "Gboard AMOLED Theme Studio",
       "description": "Adds configurable standalone AMOLED Gboard themes. Midnight Red is the default palette; additional themes can be defined in one patch.",
       "default": false,
-      "category": null,
       "dependencies": [
         "RawResourcePatch"
       ],

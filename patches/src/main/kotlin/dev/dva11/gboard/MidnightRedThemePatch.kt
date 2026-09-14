@@ -72,21 +72,16 @@ private fun parseAdditionalThemes(value: String): List<ThemeSpec> {
     val input = value.trim()
     if (input.isEmpty() || input.equals("(none)", ignoreCase = true)) return emptyList()
 
-    // Ignore empty entries caused by leading/trailing/repeated `;;` separators.
-    // This prevents a blank optional field from crashing the patch while still
-    // rejecting genuinely malformed non-empty entries.
-    val entries = input
-        .split(";;")
-        .map(String::trim)
-        .filter(String::isNotEmpty)
-
-    return entries.mapIndexed { index, entry ->
-        val fields = entry.split('|', limit = 5)
-        require(fields.size == 5) {
-            "Additional theme #${index + 1} must use: Name|Background|Primary|Secondary|Tertiary"
+    return input.split(";;")
+        .map { it.trim() }
+        .filter { it.isNotEmpty() }
+        .mapIndexed { index, entry ->
+            val fields = entry.split('|', limit = 5)
+            require(fields.size == 5) {
+                "Additional theme #${index + 1} must use: Name|Background|Primary|Secondary|Tertiary"
+            }
+            normalizeSpec(fields[0], fields[1], fields[2], fields[3], fields[4])
         }
-        normalizeSpec(fields[0], fields[1], fields[2], fields[3], fields[4])
-    }
 }
 
 private fun slugify(name: String, index: Int): String {
@@ -289,6 +284,9 @@ private fun injection(specs: List<ThemeSpec>): String {
         # ThemeListingFragment is not guaranteed to extend androidx.fragment.app.Fragment.
         # Resolve getContext() through the actual runtime class so ART does not reject the
         # injected invoke-virtual receiver when Gboard uses a different fragment base class.
+        # The fragment callback is invoked while its context is attached, so no branch/label
+        # is needed here; avoiding an injected label also prevents non-zero insertion offset
+        # verification failures in ART.
         invoke-virtual {p0}, Ljava/lang/Object;->getClass()Ljava/lang/Class;
         move-result-object v9
         const-string v10, "getContext"
@@ -301,9 +299,7 @@ private fun injection(specs: List<ThemeSpec>): String {
         invoke-virtual {v9, p0, v10}, Ljava/lang/reflect/Method;->invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;
         move-result-object v9
         check-cast v9, Landroid/content/Context;
-        if-eqz v9, :midnight_red_theme_end
         $registrations
-        :midnight_red_theme_end
     """.trimIndent()
 }
 

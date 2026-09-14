@@ -7,11 +7,6 @@ on:
 jobs:
   release:
     name: Release
-    env:
-      # The Morphe Gradle plugin is hosted in GitHub Packages and requires authentication.
-      # Expose the token at job scope so plugin resolution works during every Gradle invocation.
-      GITHUB_ACTOR: ${{ github.actor }}
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     permissions:
       contents: write
       packages: write
@@ -51,13 +46,6 @@ jobs:
           gradle-version: '9.7.1'
           cache-read-only: false
 
-      - name: Verify Morphe package credentials
-        run: |
-          set -euo pipefail
-          test -n "${GITHUB_TOKEN}"
-          test -n "${GITHUB_ACTOR}"
-          echo "GitHub Packages credentials are available to Gradle"
-
       - name: Ensure Gradle wrapper is present
         run: |
           if [ ! -f gradle/wrapper/gradle-wrapper.jar ]; then
@@ -67,6 +55,8 @@ jobs:
           chmod +x gradlew
 
       - name: Ensure Morphe dev branch exists
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           if git ls-remote --exit-code --heads origin dev >/dev/null 2>&1; then
             echo "origin/dev already exists"
@@ -81,6 +71,8 @@ jobs:
       - name: Release
         uses: cycjimmy/semantic-release-action@v6
         id: release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # Verify the exact public metadata and release asset that Morphe Manager will consume.
       # This catches broken/partial releases before the workflow is considered successful.
@@ -116,4 +108,6 @@ jobs:
 
       - name: Verify project compiles
         if: steps.release.outputs.new_release_published != 'true'
-        run: ./gradlew clean :patches:buildAndroid --no-daemon --build-cache
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./gradlew :patches:buildAndroid clean --no-daemon --build-cache

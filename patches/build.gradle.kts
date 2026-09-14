@@ -13,6 +13,9 @@ patches {
     }
 }
 
+// Keep the patcher version aligned with the app.morphe.patches 1.3.3 toolchain.
+// Do not upgrade morphe-patcher independently without upgrading the Morphe/Kotlin toolchain.
+
 // Match the Morphe template: Gson is available to the generated patch-list task
 // but is not bundled into the patch APK.
 val patchListGeneratorClasspath = configurations.create("patchListGeneratorClasspath")

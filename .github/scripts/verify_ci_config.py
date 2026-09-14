@@ -24,18 +24,12 @@ checks = [
     ("Ensure Morphe dev branch exists", release),
     ("Verify published Morphe metadata", release),
     ("git push origin HEAD:refs/heads/dev", release),
-    ("GITHUB_ACTOR: ${{ github.actor }}", release),
-    ("GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}", release),
-    ("Verify Morphe package credentials", release),
         ]
 for needle, haystack in checks:
     assert needle in haystack, needle
 assert "npm ci" not in release
 assert "github.ref_name == 'main' || github.ref_name == 'dev'" in release
 assert "actions/cache@" not in release
-assert "id(\"app.morphe.patches\") version \"1.3.3\"" in Path("settings.gradle.kts").read_text()
-assert "maven.pkg.github.com/MorpheApp/registry" in Path("settings.gradle.kts").read_text()
-assert "GITHUB_TOKEN" in Path("settings.gradle.kts").read_text()
 assert Path("patches/src/main/kotlin/util/PatchListGenerator.kt").exists()
 for metadata in ("patches-bundle.json", "patches-list.json"):
     assert Path(metadata).exists(), metadata

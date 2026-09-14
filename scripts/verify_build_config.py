@@ -6,7 +6,7 @@ build = Path("patches/build.gradle.kts").read_text()
 workflow = Path(".github/workflows/release.yml").read_text()
 generator = Path("patches/src/main/kotlin/util/PatchListGenerator.kt").read_text()
 
-assert 'morphe-patcher = "1.13.0"' in catalog
+assert 'morphe-patcher = "1.7.0"' in catalog
 assert 'morphe-patcher = { module = "app.morphe:morphe-patcher", version.ref = "morphe-patcher" }' in catalog
 assert 'id("app.morphe.patches") version "1.3.3"' in settings
 assert 'name = "Gboard AMOLED Theme Studio"' in build
@@ -20,7 +20,4 @@ assert 'cache-dependency-path: package-lock.json' in workflow
 assert 'gradle/actions/setup-gradle@v6' in workflow
 assert "gradle-version: '9.7.1'" in workflow
 assert 'gradle wrapper --gradle-version 9.7.1' in workflow
-assert 'Verify Morphe package credentials' in workflow
-assert 'GITHUB_ACTOR: ${{ github.actor }}' in workflow
-assert 'GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}' in workflow
 print("Build configuration verification passed")
