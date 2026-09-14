@@ -22,8 +22,8 @@ pluginManagement {
 }
 
 plugins {
-    // 1.3.2 is a published Morphe settings-plugin version with the required AGP 9.x compatibility.
-    id("app.morphe.patches") version "1.3.2"
+    // 1.3.4 is the current published Morphe settings-plugin release and is required for the Kotlin 2.4 toolchain used by Morphe Patcher 1.13.x.
+    id("app.morphe.patches") version "1.3.4"
 }
 
 settings {
