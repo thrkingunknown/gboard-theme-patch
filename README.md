@@ -32,16 +32,17 @@ entries are ignored instead of aborting the entire patch.
 
 ## Morphe source metadata
 
-The canonical repository source is:
+This patch bundle is usable as a local `.mpp` regardless of remote metadata. For a **Remote** Morphe source, the GitHub repository itself must be publicly reachable and the file below must exist on its `main` branch:
+
+Repository:
 `https://github.com/thrkingunknown/gboard-theme-patch`
 
-Morphe Manager resolves that repository to this metadata file on `main`:
+Metadata:
 `https://raw.githubusercontent.com/thrkingunknown/gboard-theme-patch/main/patches-bundle.json`
 
-For a direct JSON source, use the raw metadata URL above. If an older Manager source entry
-shows **Metadata N/A**, remove that old entry and re-add the repository or the direct `.json`
-URL so Manager refreshes its remote metadata record. The installed bundle remains usable even
-while metadata is unavailable.
+Morphe Manager resolves a GitHub repository source to `patches-bundle.json` on the repository's `main` branch. **Metadata N/A means Manager could not fetch that remote JSON; it is not an MPP patch-code failure.** citeturn883791search1turn883791search0
+
+After the repository and release are actually published, remove the old `Metadata N/A` source entry and re-add either the repository URL above or the direct raw JSON URL. If the repository is private, use the `.mpp` as a Local source instead; a private GitHub repository cannot provide public remote metadata to Morphe Manager.
 
 ## Compatibility
 
@@ -68,7 +69,7 @@ Project/release version is managed by semantic-release; the generated release me
 
 
 <!-- PATCHES_START -->
-> **[v1.0.2](https://github.com/thrkingunknown/gboard-theme-patch/releases/tag/v1.0.2)** • `main` • 1 patches total
+> **[v1.0.0](https://github.com/thrkingunknown/gboard-theme-patch/releases/tag/v1.0.0)** • `main` • 1 patches total
 <details open>
 <summary>📦 Gboard • 1 patch</summary>
 <br>
