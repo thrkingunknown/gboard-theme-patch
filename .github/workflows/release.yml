@@ -30,10 +30,10 @@ jobs:
         with:
           node-version: 'lts/*'
           cache: 'npm'
-          cache-dependency-path: package-lock.json
+          cache-dependency-path: package.json
 
       - name: Install dependencies
-        run: npm ci --prefer-offline --no-audit --fund=false
+        run: npm install --no-audit --no-fund
 
       - name: Setup Gradle for wrapper bootstrap
         uses: gradle/actions/setup-gradle@v6
