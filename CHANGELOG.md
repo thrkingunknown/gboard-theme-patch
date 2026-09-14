@@ -1,3 +1,9 @@
+## [1.2.0](https://github.com/thrkingunknown/gboard-theme-patch/compare/v1.1.0...v1.2.0) (2026-09-14)
+
+### ✨ New Features
+
+* add patch configuration, verification scripts, and build improvements ([ddb37e4](https://github.com/thrkingunknown/gboard-theme-patch/commit/ddb37e43825efa8b2a4e5f0e8df0e99cd8dfbb5d))
+
 ## [1.1.0](https://github.com/thrkingunknown/gboard-theme-patch/compare/v1.0.7...v1.1.0) (2026-09-14)
 
 ### 🐛 Bug Fixes
