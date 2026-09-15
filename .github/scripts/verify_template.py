@@ -30,7 +30,7 @@ readme = Path("README.md").read_text(encoding="utf-8")
 assert 'id("app.morphe.patches") version "1.3.4"' in settings
 assert 'includeBuild(localMorphePlugin)' in settings
 assert 'includeBuild(localMorphePatcher)' in settings
-assert "maven.pkg.github.com/MorpheApp/registry" not in settings
+assert "maven.pkg.github.com/MorpheApp/registry" in settings
 assert "mavenLocal()" not in settings
 assert 'morphe-patcher = "1.13.0"' in catalog
 assert 'morphe-patcher = { module = "app.morphe:morphe-patcher", version.ref = "morphe-patcher" }' in catalog

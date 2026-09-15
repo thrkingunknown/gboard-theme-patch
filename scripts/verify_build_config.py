@@ -21,5 +21,5 @@ assert 'cache-dependency-path: package-lock.json' in workflow
 assert 'gradle/actions/setup-gradle@v6' in workflow
 assert "gradle-version: '9.7.1'" in workflow
 assert 'gradle wrapper --gradle-version 9.7.1' not in workflow
-assert 'cp .gradle-deps/morphe-patcher/gradle/wrapper/gradle-wrapper.jar gradle/wrapper/gradle-wrapper.jar' in Path('.github/scripts/bootstrap_morphe.sh').read_text()
+assert 'cp morphe-deps/morphe-patcher/gradle/wrapper/gradle-wrapper.jar gradle/wrapper/gradle-wrapper.jar' in Path('.github/scripts/bootstrap_morphe.sh').read_text()
 print("Build configuration verification passed")

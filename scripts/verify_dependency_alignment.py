@@ -10,8 +10,8 @@ assert 'morphe-patcher = "1.13.0"' in catalog
 assert 'id("app.morphe.patches") version "1.3.4"' in settings
 assert 'includeBuild(localMorphePlugin)' in settings
 assert 'mavenLocal()' not in settings
-assert 'maven.pkg.github.com/MorpheApp/registry' not in settings
-assert 'maven.pkg.github.com/MorpheApp/registry' not in workflow
+assert 'maven.pkg.github.com/MorpheApp/registry' in settings
+assert 'packages: read' in workflow
 assert 'Bootstrap pinned Morphe toolchain' in workflow
 
 assert '-Xcontext-parameters' not in build

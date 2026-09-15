@@ -8,12 +8,12 @@ assert 'id("app.morphe.patches") version "1.3.4"' in settings
 assert 'includeBuild(localMorphePlugin)' in settings
 assert 'localMorphePatcher' in settings
 assert 'substitute(module("app.morphe:morphe-patcher")).using(project(":"))' in settings
-assert '.gradle-deps/morphe-patches-gradle-plugin' in bootstrap
-assert '.gradle-deps/morphe-patcher' in bootstrap
+assert 'morphe-deps/morphe-patches-gradle-plugin' in bootstrap
+assert 'morphe-deps/morphe-patcher' in bootstrap
 assert 'publishToMavenLocal' not in bootstrap
 assert 'publishToMavenLocal' not in workflow
-assert 'maven.pkg.github.com/MorpheApp/registry' not in settings
-assert 'maven.pkg.github.com/MorpheApp/registry' not in workflow
+assert 'maven.pkg.github.com/MorpheApp/registry' in settings
+assert 'packages: read' in workflow
 assert 'Bootstrap pinned Morphe toolchain' in workflow
 
 assert 'v1.3.4 1.3.4' in bootstrap

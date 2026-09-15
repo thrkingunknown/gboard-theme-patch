@@ -53,7 +53,8 @@ assert 'includeBuild(localMorphePlugin)' in settings_text
 assert 'includeBuild(localMorphePatcher)' in settings_text
 assert 'substitute(module("app.morphe:morphe-patcher")).using(project(":"))' in settings_text
 assert "bootstrap_morphe.sh" in release
-assert "maven.pkg.github.com/MorpheApp/registry" not in settings_text
+assert "maven.pkg.github.com/MorpheApp/registry" in settings_text
+assert "packages: read" in release
 assert "publishToMavenLocal" not in release
 assert "bash .github/scripts/bootstrap_morphe.sh" in release
 wrapper_step = release.index("Bootstrap pinned Morphe toolchain")

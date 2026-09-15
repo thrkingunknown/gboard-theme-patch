@@ -13,8 +13,8 @@ assert 'MorpheApp/morphe-patches-gradle-plugin' in bootstrap
 assert 'MorpheApp/morphe-patcher' in bootstrap
 assert 'publishToMavenLocal' not in bootstrap
 assert 'publishToMavenLocal' not in workflow
-assert 'maven.pkg.github.com/MorpheApp/registry' not in settings
-assert 'maven.pkg.github.com/MorpheApp/registry' not in workflow
+assert 'maven.pkg.github.com/MorpheApp/registry' in settings
+assert 'packages: read' in workflow
 assert 'Bootstrap pinned Morphe toolchain' in workflow
 
 print("Morphe toolchain alignment verification passed")
