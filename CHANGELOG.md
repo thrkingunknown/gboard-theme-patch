@@ -1,3 +1,9 @@
+## [1.3.0](https://github.com/thrkingunknown/gboard-theme-patch/compare/v1.2.0...v1.3.0) (2026-09-15)
+
+### ✨ New Features
+
+* add Midnight Red theme patch and remove additional themes option ([81fb302](https://github.com/thrkingunknown/gboard-theme-patch/commit/81fb302cdb5c94567ab5aa3b8269e89fdb516892))
+
 ## [1.2.0](https://github.com/thrkingunknown/gboard-theme-patch/compare/v1.1.0...v1.2.0) (2026-09-14)
 
 ### ✨ New Features
