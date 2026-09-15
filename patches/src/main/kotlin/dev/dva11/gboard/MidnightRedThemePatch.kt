@@ -3,6 +3,7 @@ package dev.dva11.gboard
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.patch.*
+import app.morphe.patcher.methodCall
 
 private const val PACKAGE_NAME = "com.google.android.inputmethod.latin"
 private const val DEFAULT_THEME_NAME = "Midnight Red"
@@ -302,17 +303,25 @@ val midnightRedTheme = bytecodePatch(
             name = "f",
             parameters = listOf("Landroid/os/Bundle;"),
             returnType = "V",
+            // The adapter consumes v5 immediately after this constructor call.
+            // Register the theme before that happens; appending at method exit
+            // mutates a list the displayed adapter has already copied.
+            filters = listOf(
+                methodCall(
+                    definingClass = "Ljxu;",
+                    name = "<init>",
+                    returnType = "V",
+                ),
+            ),
         )
 
-        val instructions = themeListing.method.implementation?.instructions
-            ?: error("ThemeListingFragment.f(Bundle) has no implementation")
-        val endIndex = instructions.lastIndex
-        require(endIndex >= 0) { "ThemeListingFragment.f(Bundle) has no instructions" }
+        val adapterAnchor = themeListing.instructionMatches.lastOrNull()
+            ?: error("Theme listing adapter construction anchor not found")
 
-        // Insert immediately before the method's terminal instruction. This avoids
-        // inserting into Gboard's existing theme-enumeration loop.
+        // The list is fully built at this point, but has not yet been handed to
+        // its adapter. This makes the new item visible on the initial render.
         themeListing.method.addInstructions(
-            endIndex,
+            adapterAnchor.index,
             injection(asset),
         )
     }

@@ -13,7 +13,8 @@
   "runtimeSafety": {
     "contextLookup": "ActivityThread.currentApplication()",
     "avoidsReflectionOnFragment": true,
-    "avoidsDirectAndroidxFragmentInvoke": true
+    "avoidsDirectAndroidxFragmentInvoke": true,
+    "registrationAnchor": "theme-list adapter construction"
   },
   "checks": {
     "morpheComposites": "scripts/verify_morphe_composites.py"

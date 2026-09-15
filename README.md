@@ -27,7 +27,9 @@ is compatible with any version of that package.
 ## Runtime safety
 
 Theme registration is inserted after Gboard finishes constructing its built-in
-theme list. It does not hook the constructor inside that loop.
+theme list and immediately before its theme-list adapter is created. This makes
+the custom item part of the adapter's initial data set rather than mutating a
+list after the screen has rendered.
 
 The registration obtains an Android `Context` via `android.app.ActivityThread.currentApplication()`.
 This avoids `Class.getMethod("getContext")` reflection which fails with `NoSuchMethodException`

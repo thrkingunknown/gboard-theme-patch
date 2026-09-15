@@ -11,8 +11,9 @@ assert 'Landroidx/fragment/app/Fragment;->getContext()' not in s
 assert 'getMethod(Ljava/lang/String;[Ljava/lang/Class;)' not in s
 assert 'new-instance v12, Ljxq;' in s
 assert 'new-instance v12, Ljyj;' not in s
-assert 'definingClass = "Ljxu;"' not in s
-assert 'val endIndex = instructions.lastIndex' in s
+assert 'definingClass = "Ljxu;"' in s
+assert 'val adapterAnchor = themeListing.instructionMatches.lastOrNull()' in s
+assert 'adapterAnchor.index' in s
 assert 'additionalThemesOption' not in s
 assert 'parseAdditionalThemes' not in s
 assert 'buildSpecs' not in s
