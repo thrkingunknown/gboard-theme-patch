@@ -9,3 +9,4 @@ gradle.properties.local
 
 # CI-only pinned Morphe build dependencies
 .gradle-deps/
+.gradle-user/
