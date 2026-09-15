@@ -1,18 +1,17 @@
 rootProject.name = "gboard-amoled-themes"
 
+// The release workflow fetches these exact tagged sources before Gradle evaluates
+// this file. Keeping both parts of the Morphe toolchain local makes builds work
+// without a GitHub Packages token and pins the API used to produce the .mpp.
 pluginManagement {
+    val localMorphePlugin = rootDir.resolve(".gradle-deps/morphe-patches-gradle-plugin")
+    if (localMorphePlugin.isDirectory) {
+        includeBuild(localMorphePlugin)
+    }
+
     repositories {
-        mavenLocal()
         gradlePluginPortal()
         google()
-        maven {
-            name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/MorpheApp/registry")
-            credentials {
-                username = providers.gradleProperty("gpr.user").getOrElse(System.getenv("GITHUB_ACTOR"))
-                password = providers.gradleProperty("gpr.key").getOrElse(System.getenv("GITHUB_TOKEN"))
-            }
-        }
         maven { url = uri("https://jitpack.io") }
     }
 }
@@ -21,5 +20,11 @@ plugins {
     id("app.morphe.patches") version "1.3.4"
 }
 
-// The Morphe Patches plugin is published to GitHub Packages.
-// CI provides gpr.user/gpr.key and GITHUB_ACTOR/GITHUB_TOKEN.
+val localMorphePatcher = rootDir.resolve(".gradle-deps/morphe-patcher")
+if (localMorphePatcher.isDirectory) {
+    includeBuild(localMorphePatcher) {
+        dependencySubstitution {
+            substitute(module("app.morphe:morphe-patcher")).using(project(":"))
+        }
+    }
+}

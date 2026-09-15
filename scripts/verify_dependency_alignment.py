@@ -9,10 +9,10 @@ workflow = Path(".github/workflows/release.yml").read_text()
 assert 'morphe-patcher = "1.13.0"' in catalog
 assert 'id("app.morphe.patches") version "1.3.4"' in settings
 assert 'includeBuild(localMorphePlugin)' in settings
-assert 'mavenLocal()' in settings
+assert 'mavenLocal()' not in settings
 assert 'maven.pkg.github.com/MorpheApp/registry' not in settings
 assert 'maven.pkg.github.com/MorpheApp/registry' not in workflow
-assert 'ORG_GRADLE_PROJECT_gpr_user' in workflow if 'workflow' in globals() else 'ORG_GRADLE_PROJECT_gpr_user' in release
+assert 'Bootstrap pinned Morphe toolchain' in workflow
 
 assert '-Xcontext-parameters' not in build
 assert 'patch.category' not in generator

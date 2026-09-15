@@ -8,7 +8,7 @@ assert 'pluginManagement {' in settings
 assert 'val localMorphePlugin = rootDir.resolve(".gradle-deps/morphe-patches-gradle-plugin")' in settings
 assert 'includeBuild(localMorphePlugin)' in settings
 assert 'id("app.morphe.patches") version "1.3.4"' in settings
-assert 'mavenLocal()' in settings
+assert 'mavenLocal()' not in settings
 assert 'maven.pkg.github.com/MorpheApp/registry' not in settings
 assert 'val localMorphePatcher = rootDir.resolve(".gradle-deps/morphe-patcher")' in settings
 assert 'substitute(module("app.morphe:morphe-patcher")).using(project(":"))' in settings
