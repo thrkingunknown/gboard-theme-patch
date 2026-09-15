@@ -4,7 +4,7 @@
   "patches": [
     {
       "name": "Gboard AMOLED Theme Studio",
-      "description": "Adds configurable standalone AMOLED Gboard themes. Midnight Red is the default palette; additional themes can be defined in one patch.",
+      "description": "Adds a configurable standalone AMOLED Gboard theme. Midnight Red is the default palette.",
       "default": false,
       "dependencies": [
         "RawResourcePatch"
@@ -64,15 +64,6 @@
           "required": false,
           "type": "kotlin.String",
           "default": "#1F0B0B",
-          "values": null
-        },
-        {
-          "key": "Additional themes",
-          "title": null,
-          "description": null,
-          "required": false,
-          "type": "kotlin.String",
-          "default": "(none)",
           "values": null
         }
       ]

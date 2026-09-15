@@ -1,6 +1,6 @@
 {
   "name": "Gboard AMOLED Theme Studio",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "package": "com.google.android.inputmethod.latin",
   "supportedVersion": "Any",
   "defaultTheme": {
@@ -10,14 +10,9 @@
     "secondary": "#2A0A0A",
     "tertiary": "#1F0B0B"
   },
-  "additionalThemes": {
-    "enabled": true,
-    "format": "Name|Background|Primary|Secondary|Tertiary",
-    "separator": ";;",
-    "emptyValue": "(none)"
-  },
   "runtimeSafety": {
-    "contextLookup": "reflection on ThemeListingFragment.getContext()",
+    "contextLookup": "ActivityThread.currentApplication()",
+    "avoidsReflectionOnFragment": true,
     "avoidsDirectAndroidxFragmentInvoke": true
   },
   "checks": {

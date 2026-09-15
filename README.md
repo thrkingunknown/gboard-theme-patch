@@ -11,22 +11,8 @@ Standalone Morphe patch for **Gboard only** (`com.google.android.inputmethod.lat
 | Primary / action | `#FF0000` |
 | Secondary / normal keys | `#2A0A0A` |
 | Tertiary / modifier keys | `#1F0B0B` |
-| Additional themes | `(none)` |
 
 Colours accept `#RRGGBB` or `#AARRGGBB`.
-
-## Additional themes
-
-The **Additional themes** option is functional.
-
-Format:
-`Name|Background|Primary|Secondary|Tertiary`
-
-Separate multiple themes with `;;`:
-`Ocean|#000000|#00B7FF|#08202A|#123C4A;;Purple|#000000|#B56CFF|#24113A|#40205C`
-
-The default Midnight Red theme is always generated from the five primary options.
-Duplicate names are collapsed case-insensitively. Malformed entries fail explicitly.
 
 ## Compatibility
 
@@ -43,9 +29,10 @@ is compatible with any version of that package.
 Theme registration is inserted after Gboard finishes constructing its built-in
 theme list. It does not hook the constructor inside that loop.
 
-The registration obtains a real Android `Context` from the Fragment and constructs
-`Ljxq` with an `Ljxq` receiver, addressing the ART verifier failure from the
-previous build.
+The registration obtains an Android `Context` via `android.app.ActivityThread.currentApplication()`.
+This avoids `Class.getMethod("getContext")` reflection which fails with `NoSuchMethodException`
+when `ThemeListingFragment`'s `getContext()` is non-public in the obfuscated class hierarchy.
+No labels, branches, or try-catch blocks are injected.
 
 ## Version
 
@@ -59,11 +46,7 @@ Project/release version is managed by semantic-release; the generated release me
 <br>
 | 💊&nbsp;Patch | 📜&nbsp;Description | ⚙️&nbsp;Options |
 |----------|----------------|-----------|
-| [Gboard AMOLED Theme Studio](#gboard-amoled-theme-studio) | Adds configurable standalone AMOLED Gboard themes. Midnight Red is the default palette; additional themes can be defined in one patch. | • Theme name<br>• Background<br>• Primary / action<br>• Secondary / normal keys<br>• Tertiary / modifier keys<br>• Additional themes |
+| [Gboard AMOLED Theme Studio](#gboard-amoled-theme-studio) | Adds a configurable standalone AMOLED Gboard theme. Midnight Red is the default palette. | • Theme name<br>• Background<br>• Primary / action<br>• Secondary / normal keys<br>• Tertiary / modifier keys |
 </details>
 
 <!-- PATCHES_END -->
-
-### Runtime safety
-
-The theme-list injection resolves `getContext()` through the concrete runtime class of `ThemeListingFragment`. It does not invoke `androidx.fragment.app.Fragment` directly, because current Gboard builds may use a different fragment base class. This avoids ART verifier failures caused by an invalid receiver type.

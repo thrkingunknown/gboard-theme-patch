@@ -4,8 +4,6 @@ import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.patch.*
 
-import java.util.Locale
-
 private const val PACKAGE_NAME = "com.google.android.inputmethod.latin"
 private const val DEFAULT_THEME_NAME = "Midnight Red"
 private const val DEFAULT_BACKGROUND = "#000000"
@@ -41,11 +39,6 @@ private val tertiaryOption = stringOption(
     key = "Tertiary / modifier keys",
     default = DEFAULT_TERTIARY,
 )
-private val additionalThemesOption = stringOption(
-    key = "Additional themes",
-    default = "(none)",
-)
-
 private data class ThemeSpec(
     val name: String,
     val background: String,
@@ -67,32 +60,6 @@ private fun normalizeSpec(
     secondary = secondary.trim().ifBlank { DEFAULT_SECONDARY },
     tertiary = tertiary.trim().ifBlank { DEFAULT_TERTIARY },
 )
-
-private fun parseAdditionalThemes(value: String): List<ThemeSpec> {
-    val input = value.trim()
-    if (input.isEmpty() || input.equals("(none)", ignoreCase = true)) return emptyList()
-
-    return input.split(";;")
-        .map { it.trim() }
-        .filter { it.isNotEmpty() }
-        .mapIndexed { index, entry ->
-            val fields = entry.split('|', limit = 5)
-            require(fields.size == 5) {
-                "Additional theme #${index + 1} must use: Name|Background|Primary|Secondary|Tertiary"
-            }
-            normalizeSpec(fields[0], fields[1], fields[2], fields[3], fields[4])
-        }
-}
-
-private fun slugify(name: String, index: Int): String {
-    val base = name
-        .lowercase(Locale.ROOT)
-        .replace(Regex("[^a-z0-9]+"), "_")
-        .trim('_')
-        .ifBlank { "theme" }
-        .take(24)
-    return "mrd_${base}_${index + 1}"
-}
 
 private fun parseColor(spec: String): Int? {
     val s = spec.trim()
@@ -227,42 +194,23 @@ private data class ThemeAsset(
     val borderPath: String,
 )
 
-private fun buildSpecs(
-    themeName: String,
-    background: String,
-    primary: String,
-    secondary: String,
-    tertiary: String,
-    additional: String,
-): List<ThemeSpec> {
-    val default = normalizeSpec(themeName, background, primary, secondary, tertiary)
-    val extras = parseAdditionalThemes(additional)
-    val unique = LinkedHashMap<String, ThemeSpec>()
-    for (spec in listOf(default) + extras) {
-        unique.putIfAbsent(spec.name.lowercase(Locale.ROOT), spec)
-    }
-    return unique.values.toList()
+private fun assetFor(spec: ThemeSpec): ThemeAsset {
+    val slug = "mrd_midnight_red_1"
+    return ThemeAsset(
+        spec = spec,
+        slug = slug,
+        metadataPath = "assets/theme/theme_package_metadata_${slug}.binarypb",
+        stylePath = "assets/theme/style_sheet_${slug}.binarypb",
+        borderPath = "assets/theme/style_sheet_${slug}_border.binarypb",
+    )
 }
-
-private fun assetsFor(specs: List<ThemeSpec>): List<ThemeAsset> =
-    specs.mapIndexed { index, spec ->
-        val slug = slugify(spec.name, index)
-        ThemeAsset(
-            spec = spec,
-            slug = slug,
-            metadataPath = "assets/theme/theme_package_metadata_${slug}.binarypb",
-            stylePath = "assets/theme/style_sheet_${slug}.binarypb",
-            borderPath = "assets/theme/style_sheet_${slug}_border.binarypb",
-        )
-    }
 
 private fun escapeSmaliString(value: String): String =
     value.replace("\\", "\\\\").replace("\"", "\\\"")
 
-private fun injection(specs: List<ThemeSpec>): String {
-    val registrations = assetsFor(specs).joinToString("\n") { asset ->
-        val metadataAsset = "assets:theme_package_metadata_${asset.slug}.binarypb"
-        """
+private fun injection(asset: ThemeAsset): String {
+    val metadataAsset = "assets:theme_package_metadata_${asset.slug}.binarypb"
+    val registration = """
         const-string v10, "${metadataAsset}"
         const/4 v11, 0x1
         new-instance v12, Lqyk;
@@ -278,28 +226,16 @@ private fun injection(specs: List<ThemeSpec>): String {
         invoke-direct {v12, v10, v11}, Ljxq;-><init>(Ljava/lang/String;Ljyj;)V
         invoke-interface {v5, v12}, Ljava/util/List;->add(Ljava/lang/Object;)Z
         """.trimIndent()
-    }
 
     return """
-        # ThemeListingFragment is not guaranteed to extend androidx.fragment.app.Fragment.
-        # Resolve getContext() through the actual runtime class so ART does not reject the
-        # injected invoke-virtual receiver when Gboard uses a different fragment base class.
-        # The fragment callback is invoked while its context is attached, so no branch/label
-        # is needed here; avoiding an injected label also prevents non-zero insertion offset
-        # verification failures in ART.
-        invoke-virtual {p0}, Ljava/lang/Object;->getClass()Ljava/lang/Class;
+        # Obtain the application Context via ActivityThread.currentApplication().
+        # This avoids Class.getMethod("getContext") which throws NoSuchMethodException
+        # when ThemeListingFragment's getContext() is non-public in the obfuscated
+        # class hierarchy. ActivityThread is always available on the main thread and
+        # requires no reflection walking, labels, or try-catch blocks.
+        invoke-static {}, Landroid/app/ActivityThread;->currentApplication()Landroid/app/Application;
         move-result-object v9
-        const-string v10, "getContext"
-        const/4 v11, 0x0
-        new-array v11, v11, [Ljava/lang/Class;
-        invoke-virtual {v9, v10, v11}, Ljava/lang/Class;->getMethod(Ljava/lang/String;[Ljava/lang/Class;)Ljava/lang/reflect/Method;
-        move-result-object v9
-        const/4 v10, 0x0
-        new-array v10, v10, [Ljava/lang/Object;
-        invoke-virtual {v9, p0, v10}, Ljava/lang/reflect/Method;->invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;
-        move-result-object v9
-        check-cast v9, Landroid/content/Context;
-        $registrations
+        $registration
     """.trimIndent()
 }
 
@@ -315,35 +251,31 @@ private val midnightRedResources = rawResourcePatch(
     val primary by primaryOption()
     val secondary by secondaryOption()
     val tertiary by tertiaryOption()
-    val additionalThemes by additionalThemesOption()
 
     execute {
-        val specs = buildSpecs(
+        val spec = normalizeSpec(
             themeName ?: DEFAULT_THEME_NAME,
             background ?: DEFAULT_BACKGROUND,
             primary ?: DEFAULT_PRIMARY,
             secondary ?: DEFAULT_SECONDARY,
             tertiary ?: DEFAULT_TERTIARY,
-            additionalThemes ?: "",
         )
-        require(specs.isNotEmpty()) { "At least one theme must be defined." }
+        val asset = assetFor(spec)
 
-        assetsFor(specs).forEach { asset ->
-            get(asset.stylePath).writeBytes(styleSheet(asset.spec))
-            get(asset.borderPath).writeBytes(ByteArray(0))
-            get(asset.metadataPath).writeBytes(
-                metadata(
-                    asset.stylePath.substringAfterLast('/'),
-                    asset.borderPath.substringAfterLast('/'),
-                )
+        get(asset.stylePath).writeBytes(styleSheet(asset.spec))
+        get(asset.borderPath).writeBytes(ByteArray(0))
+        get(asset.metadataPath).writeBytes(
+            metadata(
+                asset.stylePath.substringAfterLast('/'),
+                asset.borderPath.substringAfterLast('/'),
             )
-        }
+        )
     }
 }
 
 val midnightRedTheme = bytecodePatch(
     name = "Gboard AMOLED Theme Studio",
-    description = "Adds configurable standalone AMOLED Gboard themes. Midnight Red is the default palette; additional themes can be defined in one patch.",
+    description = "Adds a configurable standalone AMOLED Gboard theme. Midnight Red is the default palette.",
     default = false,
 ) {
     compatibleWith(compatibility)
@@ -354,17 +286,17 @@ val midnightRedTheme = bytecodePatch(
     val primary by primaryOption()
     val secondary by secondaryOption()
     val tertiary by tertiaryOption()
-    val additionalThemes by additionalThemesOption()
 
     execute {
-        val specs = buildSpecs(
+        val spec = normalizeSpec(
             themeName ?: DEFAULT_THEME_NAME,
             background ?: DEFAULT_BACKGROUND,
             primary ?: DEFAULT_PRIMARY,
             secondary ?: DEFAULT_SECONDARY,
             tertiary ?: DEFAULT_TERTIARY,
-            additionalThemes ?: "",
         )
+        val asset = assetFor(spec)
+
         val themeListing = Fingerprint(
             definingClass = "Lcom/google/android/apps/inputmethod/libs/theme/listing/ThemeListingFragment;",
             name = "f",
@@ -381,7 +313,7 @@ val midnightRedTheme = bytecodePatch(
         // inserting into Gboard's existing theme-enumeration loop.
         themeListing.method.addInstructions(
             endIndex,
-            injection(specs),
+            injection(asset),
         )
     }
 }
